@@ -29,22 +29,12 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ⭐️ THE ONLY CHANGE IS HERE: 'text-align' IS NOW 'center' ⭐️
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
             h1 { margin-top: 0; margin-bottom: 1rem; }
             .small-metric { font-size: 15px !important; margin-bottom: 2px !important; line-height: 1.2; }
-
-            /* New style for the aligned column titles */
-            .column-title {
-                font-size: 16px !important;
-                font-weight: bold;
-                text-align: center; /* This centers the title in its column */
-                margin-bottom: 0px;
-            }
-
-            /* Single-line multiselect styles */
+            .column-title { font-size: 16px !important; font-weight: bold; text-align: center; margin-bottom: 0px; }
             div[data-baseweb="select"] > div:first-child { flex-wrap: nowrap !important; overflow-x: auto !important; }
             div[data-baseweb="select"] { max-height: 50px; overflow-y: hidden; font-size: 14px !important; }
             label { font-size: 14px !important; }
@@ -116,8 +106,16 @@ if check_password():
     with col_right:
         chart_col1, chart_col2 = st.columns(2)
 
+        # ⭐️ CHANGE 1: Determine a shared color range for both charts BEFORE creating them.
+        color_min, color_max = None, None
+        if not filtered_df.empty:
+            avg_means = filtered_df.groupby("location_name")["val"].mean()
+            if not avg_means.empty:
+                color_min = avg_means.min()
+                color_max = avg_means.max()
+
         with chart_col1:
-            if not filtered_df.empty:
+            if not filtered_df.empty and color_min is not None:
                 avg_loc = (
                     filtered_df.groupby("location_name")["val"]
                     .mean().reset_index()
@@ -128,11 +126,19 @@ if check_password():
                     height = max(400, len(avg_loc) * 25 + 100)
                     fig_ranked = px.bar(
                         avg_loc, x="val", y="location_name", orientation="h",
-                        color="val", color_continuous_scale=px.colors.sequential.Plasma_r,
+                        color="val",
+                        # ⭐️ CHANGE 2: Use the same color scale and the shared data range.
+                        color_continuous_scale="Viridis",
+                        range_color=[color_min, color_max],
                         labels={"val": "Mean Age", "location_name": "Location"},
                     )
                     fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
-                    fig_ranked.update_layout(height=height, margin=dict(l=10, r=10, t=0, b=10), title_text=None)
+                    # ⭐️ CHANGE 3: Hide the color bar on this chart to avoid duplication.
+                    fig_ranked.update_layout(
+                        height=height, margin=dict(l=10, r=10, t=0, b=10),
+                        title_text=None,
+                        coloraxis_showscale=False
+                    )
                     st.plotly_chart(fig_ranked, use_container_width=True)
                 else:
                     st.warning("No data for ranking chart.")
@@ -140,7 +146,7 @@ if check_password():
                 st.warning("No data for ranking chart.")
 
         with chart_col2:
-            if not filtered_df.empty:
+            if not filtered_df.empty and color_min is not None:
                 avg_map = (
                     filtered_df.groupby("location_name")["val"]
                     .mean().reset_index()
@@ -148,7 +154,10 @@ if check_password():
                 )
                 fig_map = px.choropleth(
                     avg_map, locations="Country", locationmode="country names",
-                    color="Mean Age", color_continuous_scale="Viridis",
+                    color="Mean Age",
+                    # ⭐️ CHANGE 4: Use the same color scale and the shared data range here as well.
+                    color_continuous_scale="Viridis",
+                    range_color=[color_min, color_max],
                     labels={"Mean Age": "Mean Age"},
                 )
                 fig_map.update_layout(height=500, margin=dict(l=0, r=0, t=0, b=0), title_text=None)
