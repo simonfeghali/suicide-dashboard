@@ -29,7 +29,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ CSS: force single row chips + horizontal scroll
+    # CSS for single-line multiselects
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
@@ -68,36 +68,33 @@ if check_password():
         all_sexes = sorted(df['sex_name'].unique())
         all_years = sorted(df['year_id'].unique())
         
-        # ⭐️ CHANGE 1: Use st.session_state to manage the location filter's state
-        # This is necessary so the checkbox can modify it.
-        if 'location_filter' not in st.session_state:
-            st.session_state.location_filter = all_locations
-
-        selected_locations = st.multiselect(
-            "Location(s)", all_locations,
-            key='location_filter' # Use the key to link the widget to session_state
-        )
-
+        selected_locations = st.multiselect("Location(s)", all_locations, default=["Global"])
         selected_sexes = st.multiselect("Sex(es)", all_sexes, default=all_sexes)
         selected_years = st.multiselect("Year(s)", all_years, default=all_years)
+        
+        # ⭐️ CHANGE 1: Add the checkbox with the new logic
+        st.subheader("⚙️ Global View")
+        show_global_top = st.checkbox("Show top 12 locations globally", help="Ignores the 'Location(s)' filter to find the top 12 across all data.")
 
-        # ⭐️ CHANGE 2: The checkbox is now a button to clear the location filter
-        # It no longer has a title above it.
-        if st.checkbox("Clear Location Selections"):
-            # When checked, set the location filter to an empty list
-            st.session_state.location_filter = []
-            # Rerun the script immediately to reflect the change
-            st.rerun()
-
-        # Apply filters
-        filtered_df = df[
-            df['location_name'].isin(selected_locations) &
-            df['sex_name'].isin(selected_sexes) &
-            df['year_id'].isin(selected_years)
-        ]
+        # ⭐️ CHANGE 2: Conditionally filter the DataFrame
+        if show_global_top:
+            # If checkbox is ticked, ignore the location filter
+            st.info("Showing global data. Location filter is ignored.")
+            filtered_df = df[
+                df['sex_name'].isin(selected_sexes) &
+                df['year_id'].isin(selected_years)
+            ]
+        else:
+            # Otherwise, use all three filters
+            filtered_df = df[
+                df['location_name'].isin(selected_locations) &
+                df['sex_name'].isin(selected_sexes) &
+                df['year_id'].isin(selected_years)
+            ]
 
         st.subheader("📌 Insights")
         if not filtered_df.empty:
+            # ... (insights section remains the same) ...
             mean_age = filtered_df['val'].mean()
             min_age = filtered_df['val'].min()
             max_age = filtered_df['val'].max()
@@ -116,27 +113,26 @@ if check_password():
         st.subheader("📊 Top 12 Ranked + Map")
         chart_col1, chart_col2 = st.columns(2)
 
-        # ✅ 1️⃣ Ranked Horizontal Bar: Top 12 Locations
         with chart_col1:
-            # ⭐️ CHANGE 3: The title is now static and logic always takes the top 12.
             st.write("**Top 12 Ranked Mean Age by Location**")
             if not filtered_df.empty:
-                avg_loc_all = (
+                # ⭐️ CHANGE 3: Sort by HIGHEST age (descending) and always take top 12
+                avg_loc = (
                     filtered_df.groupby("location_name")["val"]
                     .mean().reset_index()
-                    .sort_values("val", ascending=True)
+                    .sort_values("val", ascending=False) # Use False for highest values
+                    .head(12)
                 )
 
-                # The chart data is ALWAYS the top 12 from the filtered data.
-                data_to_display = avg_loc_all.head(12)
-
-                if not data_to_display.empty:
-                    height = max(400, len(data_to_display) * 25 + 100)
+                if not avg_loc.empty:
+                    height = max(400, len(avg_loc) * 25 + 100)
+                    # For a ranked chart, it's better to show highest at the top
                     fig_ranked = px.bar(
-                        data_to_display, x="val", y="location_name", orientation="h",
-                        color="val", color_continuous_scale="Blues",
+                        avg_loc, x="val", y="location_name", orientation="h",
+                        color="val", color_continuous_scale=px.colors.sequential.Plasma_r,
                         labels={"val": "Mean Age", "location_name": "Location"},
                     )
+                    # This sorts the y-axis to match the data order (highest on top)
                     fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
                     fig_ranked.update_layout(height=height, margin=dict(l=10, r=10, t=30, b=10))
                     st.plotly_chart(fig_ranked, use_container_width=True)
@@ -145,10 +141,10 @@ if check_password():
             else:
                 st.warning("No data for ranking chart.")
 
-        # ✅ 2️⃣ Choropleth Map (no changes needed)
         with chart_col2:
             st.write("**🌍 Mean Age by Location (Map)**")
             if not filtered_df.empty:
+                # This chart logic doesn't need to change, it will use the correct `filtered_df`
                 avg_map = (
                     filtered_df.groupby("location_name")["val"]
                     .mean().reset_index()
@@ -164,8 +160,4 @@ if check_password():
             else:
                 st.warning("No data for map.")
 
-    st.markdown(
-        "<hr style='margin-top: 20px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Single Row Filters • IHME GBD 2021</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown("<hr><div style='text-align: center;'>✅ Single Row Filters • IHME GBD 2021</div>", unsafe_allow_html=True)
