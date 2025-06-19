@@ -71,17 +71,25 @@ if check_password():
         
         show_global_top = st.checkbox("Show top 12 locations globally", help="Ignores the 'Location(s)' filter to find the top 12 across all data.")
 
-        # ⭐️ THE FIX IS HERE: Set 'default' to 'all_locations' to make the 'X' button appear.
+        # ⭐️ FIX: Setting 'default' to the full list for EACH filter makes the 'X' appear.
         selected_locations = st.multiselect(
             "Location(s)",
             all_locations,
-            default=all_locations, # Changed from ["Global"]
+            default=all_locations,
             disabled=show_global_top
         )
         
-        # These were already correct, so they will continue to show the 'X' button.
-        selected_sexes = st.multiselect("Sex(es)", all_sexes, default=all_sexes)
-        selected_years = st.multiselect("Year(s)", all_years, default=all_years)
+        selected_sexes = st.multiselect(
+            "Sex(es)",
+            all_sexes,
+            default=all_sexes
+        )
+        
+        selected_years = st.multiselect(
+            "Year(s)",
+            all_years,
+            default=all_years
+        )
         
         if show_global_top:
             filtered_df = df[df['sex_name'].isin(selected_sexes) & df['year_id'].isin(selected_years)]
