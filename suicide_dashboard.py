@@ -35,7 +35,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Polished CSS: small multiselects, single row, scroll, small chips
+    # ✅ CSS — compact multiselects, single line tags, and tidy styling
     st.markdown("""
         <style>
             .block-container {
@@ -54,13 +54,13 @@ if check_password():
                 padding-right: 10px;
             }
 
-            /* Shrink multiselect input box */
+            /* Shrink multiselect input */
             div[data-baseweb="select"] {
                 min-height: 36px !important;
                 font-size: 12px !important;
             }
 
-            /* Single line, horizontal scroll for tags */
+            /* Force tags single line, scroll horizontally */
             div[data-baseweb="tag"] {
                 display: flex;
                 flex-wrap: nowrap !important;
@@ -70,7 +70,7 @@ if check_password():
                 max-height: 32px !important;
             }
 
-            /* Individual tag chip smaller */
+            /* Smaller tag chips */
             span[data-baseweb="tag"] {
                 font-size: 11px !important;
                 height: 22px !important;
@@ -95,7 +95,7 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    # ✅ MAIN 2 COLUMN LAYOUT:
+    # ✅ MAIN 2 COLUMN LAYOUT
     col_left, col_right = st.columns([0.7, 3.3])
 
     # ✅ LEFT COLUMN — FLUSH TOP, COMPACT FILTERS
@@ -158,9 +158,10 @@ if check_password():
             min_age = filtered_df['val'].min()
             max_age = filtered_df['val'].max()
 
+            # ✅ FIXED: no extra <br>
             insights_html = [
                 f"Overall Mean Age: <b>{mean_age:.2f} years</b>",
-                f"Age Range: <b>{min_age:.2f} - {max_age:.2f}</b><br>",
+                f"Age Range: <b>{min_age:.2f} - {max_age:.2f}</b>",
                 "<b>Mean Age by Sex:</b>"
             ]
 
