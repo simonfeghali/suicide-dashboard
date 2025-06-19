@@ -27,7 +27,7 @@ def check_password():
 # ✅ 2️⃣ Run if password OK
 # -------------------------------
 if check_password():
-    st.title("📊 Suicide Mean Age Dashboard (Three Columns Layout)")
+    st.title("📊 Suicide Mean Age Dashboard (Three Columns with Spacing)")
 
     @st.cache_data
     def load_data():
@@ -37,12 +37,14 @@ if check_password():
     df = load_data()
 
     # -------------------------------
-    # ✅ 3️⃣ Create 3 side-by-side columns
+    # ✅ 3️⃣ Three side-by-side columns WITH spacing columns
+    # Layout: [Filter] [space] [Insights] [space] [Chart]
+    # Wider chart column for balance
     # -------------------------------
-    col1, col2, col3 = st.columns([1, 1, 2])  # make chart column a bit wider
+    col1, spacer1, col2, spacer2, col3 = st.columns([1, 0.1, 1, 0.1, 2])
 
     # -------------------------------
-    # ✅ Column 1: Filters stacked vertically
+    # ✅ Column 1: Filters (stacked vertically)
     # -------------------------------
     with col1:
         st.header("🎛️ Filters")
@@ -57,7 +59,7 @@ if check_password():
         )
 
     # -------------------------------
-    # ✅ Filtered Data
+    # ✅ Apply Filters
     # -------------------------------
     filtered_df = df[
         df['location_name'].isin(selected_locations) &
@@ -66,7 +68,7 @@ if check_password():
     ]
 
     # -------------------------------
-    # ✅ Column 2: Insights stacked vertically
+    # ✅ Column 2: Insights (stacked vertically)
     # -------------------------------
     with col2:
         st.header("📌 Insights")
@@ -74,7 +76,7 @@ if check_password():
         st.metric("Age Range", f"{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}")
 
     # -------------------------------
-    # ✅ Column 3: Chart (and optional table)
+    # ✅ Column 3: Chart (+ optional data table)
     # -------------------------------
     with col3:
         st.header("📈 Chart")
@@ -95,8 +97,7 @@ if check_password():
         else:
             st.warning("No data for selected filters.")
 
-        # Optional: table in same column
         with st.expander("Show Filtered Data Table"):
             st.dataframe(filtered_df, height=200)
 
-    st.caption("✅ One-page, three-columns dashboard • IHME GBD 2021")
+    st.caption("✅ Clean three-columns layout with spacing • IHME GBD 2021")
