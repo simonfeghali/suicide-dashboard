@@ -29,16 +29,26 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
+    # ✅ CSS for fixed-height filter box with scroll
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
             h1 { margin-top: 0; margin-bottom: 1rem; }
             .small-metric { font-size: 18px !important; }
             div[data-baseweb="select"] { max-height: 150px; overflow-y: auto; }
+            /* Fixed height + scroll for filter box */
+            .filter-box {
+                max-height: 300px;
+                overflow-y: auto;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background-color: #f9f9f9;
+            }
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Final Compact Filters</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Compact Filter Panel</h1>", unsafe_allow_html=True)
 
     @st.cache_data
     def load_data():
@@ -50,25 +60,25 @@ if check_password():
     col_left, col_right = st.columns([1, 3])
 
     with col_left:
-        st.subheader("🎛️ Filters (One Row)")
+        st.subheader("🎛️ Filters")
 
-        # ✅ Filters in one row using columns:
-        fcol1, fcol2, fcol3 = st.columns(3)
+        # ✅ Wrap filters in a fixed-height box
+        with st.container():
+            st.markdown('<div class="filter-box">', unsafe_allow_html=True)
 
-        with fcol1:
             selected_locations = st.multiselect(
                 "Location(s)", sorted(df['location_name'].unique()), default=["Global"]
             )
 
-        with fcol2:
             selected_sexes = st.multiselect(
                 "Sex(es)", sorted(df['sex_name'].unique()), default=sorted(df['sex_name'].unique())
             )
 
-        with fcol3:
             selected_years = st.multiselect(
                 "Year(s)", sorted(df['year_id'].unique()), default=sorted(df['year_id'].unique())
             )
+
+            st.markdown('</div>', unsafe_allow_html=True)
 
         # Apply filters
         filtered_df = df[
@@ -149,6 +159,6 @@ if check_password():
 
     st.markdown(
         "<hr style='margin-top: 20px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Final Compact Filters Dashboard • IHME GBD 2021</div>",
+        "<div style='text-align: center;'>✅ Compact Filter Row with Scroll • IHME GBD 2021</div>",
         unsafe_allow_html=True
     )
