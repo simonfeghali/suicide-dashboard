@@ -106,7 +106,6 @@ if check_password():
     with col_right:
         chart_col1, chart_col2 = st.columns(2)
 
-        # ⭐️ CHANGE 1: Determine a shared color range for both charts BEFORE creating them.
         color_min, color_max = None, None
         if not filtered_df.empty:
             avg_means = filtered_df.groupby("location_name")["val"].mean()
@@ -127,13 +126,12 @@ if check_password():
                     fig_ranked = px.bar(
                         avg_loc, x="val", y="location_name", orientation="h",
                         color="val",
-                        # ⭐️ CHANGE 2: Use the same color scale and the shared data range.
+                        # ⭐️ THIS IS THE FIX: Ensure both charts use the same color scale ⭐️
                         color_continuous_scale="Viridis",
                         range_color=[color_min, color_max],
                         labels={"val": "Mean Age", "location_name": "Location"},
                     )
                     fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
-                    # ⭐️ CHANGE 3: Hide the color bar on this chart to avoid duplication.
                     fig_ranked.update_layout(
                         height=height, margin=dict(l=10, r=10, t=0, b=10),
                         title_text=None,
@@ -155,7 +153,6 @@ if check_password():
                 fig_map = px.choropleth(
                     avg_map, locations="Country", locationmode="country names",
                     color="Mean Age",
-                    # ⭐️ CHANGE 4: Use the same color scale and the shared data range here as well.
                     color_continuous_scale="Viridis",
                     range_color=[color_min, color_max],
                     labels={"Mean Age": "Mean Age"},
