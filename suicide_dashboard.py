@@ -27,6 +27,8 @@ def check_password():
 # ✅ 2️⃣ Run if password OK
 # -------------------------------
 if check_password():
+    st.set_page_config(layout="wide")  # ✅ Full-width mode
+
     st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard</h1>", unsafe_allow_html=True)
 
     @st.cache_data
@@ -37,11 +39,10 @@ if check_password():
     df = load_data()
 
     # -------------------------------
-    # ✅ 3️⃣ Three side-by-side columns WITH BIG SPACERS
-    # Layout: [Filter] [BIG GAP] [Insights] [BIG GAP] [Chart]
-    # Chart column is the widest for clarity.
+    # ✅ 3️⃣ Balanced Columns with realistic spacers
+    # Layout: [Filter] [small gap] [Insights] [small gap] [Chart]
     # -------------------------------
-    col1, spacer1, col2, spacer2, col3 = st.columns([1, 1.2, 1, 1.2, 3])
+    col1, spacer1, col2, spacer2, col3 = st.columns([1, 0.3, 1, 0.3, 3])
 
     # -------------------------------
     # ✅ Column 1: Filters
@@ -76,7 +77,7 @@ if check_password():
         st.metric("Age Range", f"{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}")
 
     # -------------------------------
-    # ✅ Column 3: Chart (+ Data Table)
+    # ✅ Column 3: Chart (+ Table)
     # -------------------------------
     with col3:
         st.header("📈 Chart")
