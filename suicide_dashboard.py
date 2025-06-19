@@ -36,26 +36,18 @@ if check_password():
             h1 { margin-top: 0; margin-bottom: 1rem; }
             .small-metric { font-size: 16px !important; }
 
-            /* --- THE FIX IS HERE --- */
-
-            /* 1. Target the container that holds all the selected "chips" */
+            /* Target the container that holds all the selected "chips" */
             div[data-baseweb="select"] > div:first-child {
-                /* Prevent the chips from wrapping to the next line */
                 flex-wrap: nowrap !important;
-                /* Add a horizontal scrollbar if the chips overflow */
                 overflow-x: auto !important;
             }
 
-            /* 2. Force the multiselect widget itself to a fixed, single-line height */
+            /* Force the multiselect widget itself to a fixed, single-line height */
             div[data-baseweb="select"] {
-                /* Set a max-height to prevent vertical growth */
-                max-height: 50px; /* Adjust this value as needed */
-                /* Hide any potential vertical scrollbar */
+                max-height: 50px;
                 overflow-y: hidden;
                 font-size: 14px !important;
             }
-            
-            /* --- END OF FIX --- */
 
             label {
                 font-size: 14px !important;
@@ -72,7 +64,6 @@ if check_password():
 
     @st.cache_data
     def load_data():
-        # Make sure you have this CSV file in the same directory or provide the correct path
         return pd.read_csv("IHME_GBD_2021_SUICIDE_1990_2021_DEATHS_MEAN_AGE_Y2025M02D12_0.csv")
 
     df = load_data()
@@ -104,6 +95,13 @@ if check_password():
             df['year_id'].isin(selected_years)
         ]
 
+        # -------------------------------
+        # ⭐️ CHANGE 1: ADD VIEW OPTIONS ⭐️
+        # -------------------------------
+        st.subheader("⚙️ View Options")
+        show_all = st.checkbox("Show all locations in ranked chart", value=False)
+        st.info("The map always shows all locations from the filters above.")
+
         st.subheader("📌 Insights")
         if not filtered_df.empty:
             mean_age = filtered_df['val'].mean()
@@ -123,37 +121,57 @@ if check_password():
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col_right:
-        st.subheader("📊 Top 12 Ranked + Map")
+        st.subheader("📊 Ranked Data + Map")
 
         chart_col1, chart_col2 = st.columns(2)
 
-        # ✅ 1️⃣ Ranked Horizontal Bar: Top 12 Locations
+        # ------------------------------------------------------------------
+        # ⭐️ CHANGE 2: MODIFY RANKED BAR CHART LOGIC AND TITLE ⭐️
+        # ------------------------------------------------------------------
         with chart_col1:
-            st.write("**Top 12 Ranked Mean Age by Location**")
+            # Dynamic title based on the checkbox state
+            ranked_chart_title = (
+                "**Top 12 Ranked Mean Age by Location**"
+                if not show_all
+                else "**Ranked Mean Age by Location (All)**"
+            )
+            st.write(ranked_chart_title)
+            
             if not filtered_df.empty:
-                avg_loc = (
+                # First, prepare the full sorted data
+                avg_loc_all = (
                     filtered_df.groupby("location_name")["val"]
                     .mean().reset_index()
                     .sort_values("val", ascending=True)
-                    .head(12)
                 )
-                height = max(400, len(avg_loc) * 30 + 100)
-                fig_ranked = px.bar(
-                    avg_loc,
-                    x="val",
-                    y="location_name",
-                    orientation="h",
-                    color="val",
-                    color_continuous_scale="Blues",
-                    labels={"val": "Mean Age", "location_name": "Location"},
-                )
-                fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
-                fig_ranked.update_layout(height=height, margin=dict(l=10, r=10, t=30, b=10))
-                st.plotly_chart(fig_ranked, use_container_width=True)
+
+                # Conditionally decide which data to display
+                if not show_all:
+                    data_to_display = avg_loc_all.head(12)
+                else:
+                    data_to_display = avg_loc_all
+
+                if not data_to_display.empty:
+                    # Height is dynamic based on the number of rows being displayed
+                    height = max(400, len(data_to_display) * 25 + 100)
+                    fig_ranked = px.bar(
+                        data_to_display,
+                        x="val",
+                        y="location_name",
+                        orientation="h",
+                        color="val",
+                        color_continuous_scale="Blues",
+                        labels={"val": "Mean Age", "location_name": "Location"},
+                    )
+                    fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
+                    fig_ranked.update_layout(height=height, margin=dict(l=10, r=10, t=30, b=10))
+                    st.plotly_chart(fig_ranked, use_container_width=True)
+                else:
+                    st.warning("No data for ranking chart.")
             else:
                 st.warning("No data for ranking chart.")
 
-        # ✅ 2️⃣ Choropleth Map
+        # ✅ 2️⃣ Choropleth Map (No changes needed here, it already shows all data)
         with chart_col2:
             st.write("**🌍 Mean Age by Location (Map)**")
             if not filtered_df.empty:
