@@ -34,23 +34,33 @@ def check_password():
 # -------------------------------
 if check_password():
     # --- PAGE CONFIG AND CSS ---
-    # Must be the first Streamlit command
     st.set_page_config(layout="wide")
 
-    # This is the key to lifting everything up to the top of the page
+    # This CSS block now includes the rule for the multiselect boxes
     st.markdown("""
         <style>
-               .block-container {
-                    padding-top: 1rem;
-                    padding-bottom: 0rem;
-                    padding-left: 5rem;
-                    padding-right: 5rem;
-                }
+            .block-container {
+                padding-top: 1rem;
+                padding-bottom: 0rem;
+                padding-left: 5rem;
+                padding-right: 5rem;
+            }
+
+            /* --- NEW CSS FOR SINGLE-LINE MULTISELECT --- */
+            /* Target the container holding the selected items */
+            div[data-testid="stMultiSelect"] > div > div {
+                /* Set a max-height to prevent it from growing vertically */
+                max-height: 3.125rem; /* 50px */
+
+                /* Make it scroll horizontally instead of vertically */
+                overflow-y: hidden;
+                overflow-x: auto;
+            }
+            /* --- END OF NEW CSS --- */
         </style>
         """, unsafe_allow_html=True)
 
     # --- TITLE ---
-    # Place the main title *before* creating the columns
     st.markdown("""
         <div style='text-align: center;'>
             <h2>Exploring the Mean Age of Suicide Mortality</h2>
@@ -62,7 +72,6 @@ if check_password():
     # --- DATA LOADING ---
     @st.cache_data
     def load_data():
-        # Make sure you have this CSV file in the same directory as your script
         return pd.read_csv("IHME_GBD_2021_SUICIDE_1990_2021_DEATHS_MEAN_AGE_Y2025M02D12_0.csv")
 
     df = load_data()
@@ -72,11 +81,9 @@ if check_password():
 
 
     # --- MAIN LAYOUT (SIDEBAR & MAIN CONTENT) ---
-    # Use st.sidebar for the controls to pin them to the left
     with st.sidebar:
         st.markdown("### Controls & Insights")
 
-        # Session state init
         if "global_view_checkbox" not in st.session_state:
             st.session_state.global_view_checkbox = False
             st.session_state.locations_filter = []
@@ -103,7 +110,6 @@ if check_password():
         st.multiselect("Sex(es)", all_sexes, key="sexes_filter")
         st.multiselect("Year(s)", all_years, key="years_filter")
 
-        # Filtered data (do this once in the sidebar)
         if st.session_state.global_view_checkbox:
             filtered_df = df[
                 df['sex_name'].isin(st.session_state.sexes_filter) &
@@ -116,9 +122,8 @@ if check_password():
                 (df['year_id'].isin(st.session_state.years_filter))
             ]
 
-        st.markdown("---") # Horizontal line
+        st.markdown("---")
 
-        # Display insights in the sidebar
         if not filtered_df.empty:
             mean_age = filtered_df['val'].mean()
             min_age = filtered_df['val'].min()
@@ -135,7 +140,6 @@ if check_password():
             st.warning("Please select filters to see data.")
 
     # --- PLOTS (MAIN CONTENT AREA) ---
-    # This part is now the main area of the page, to the right of the sidebar
     row1_col1, row1_col2 = st.columns(2)
 
     with row1_col1:
