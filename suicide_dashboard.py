@@ -3,64 +3,69 @@ import pandas as pd
 import plotly.express as px
 
 # -------------------------------
-# 1. Password Gate
+# ✅ 1️⃣ Password Gate
 # -------------------------------
 def check_password():
-    """Returns `True` if the user has the correct password."""
-
     def password_entered():
-        """Checks whether a password entered by the user is correct."""
         if st.session_state["password"] == "123456":
             st.session_state["password_correct"] = True
-            del st.session_state["password"]  # Don't store password.
+            del st.session_state["password"]
         else:
             st.session_state["password_correct"] = False
 
     if "password_correct" not in st.session_state:
-        # First run, show input for password.
         st.text_input(
-            "🔒 Enter password:", type="password", on_change=password_entered, key="password"
+            "🔒 Enter password:", type="password",
+            on_change=password_entered, key="password"
         )
         return False
     elif not st.session_state["password_correct"]:
-        # Password not correct, show input + error.
         st.text_input(
-            "🔒 Enter password:", type="password", on_change=password_entered, key="password"
+            "🔒 Enter password:", type="password",
+            on_change=password_entered, key="password"
         )
         st.error("❌ Wrong password")
         return False
     else:
-        # Password correct.
         return True
 
 # -------------------------------
-# 2. Main App
+# ✅ 2️⃣ Main App
 # -------------------------------
 if check_password():
     st.set_page_config(layout="wide")
 
-    # --- Custom CSS for styling ---
+    # ✅ Custom CSS: bulletproof single-row chips with scroll
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
-            h2 { margin-top: 0; } /* Adjusted for smaller h2 title */
+            h2 { margin-top: 0; }
             .small-metric { font-size: 15px !important; line-height: 1.2; }
             .column-title { font-size: 16px !important; font-weight: bold; text-align: center; margin-bottom: 0px; }
-            /* Single-line multiselect styles */
-            div[data-baseweb="select"] > div:first-child { flex-wrap: nowrap !important; overflow-x: auto !important; }
-            div[data-baseweb="select"] {
-                max-height: 50px;
-                overflow-y: hidden;
-                font-size: 14px !important;
-                align-items: flex-start !important; /* Forces icons to stay at the top */
+
+            /* ✅ Real fix: target tag container exactly */
+            div[data-baseweb="tag"] {
+                display: flex;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                white-space: nowrap;
+                max-height: 40px;
             }
+
+            /* Tighten select box */
+            div[data-baseweb="select"] {
+                min-height: 40px !important;
+                font-size: 14px !important;
+                align-items: flex-start !important;
+            }
+
             label { font-size: 14px !important; }
             .left-column { max-width: 250px; padding-right: 10px; }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- Main Title with Data Source Subtitle ---
-    # ⭐️ THE TITLE TAG HAS BEEN CHANGED FROM <h1> to <h2> TO MAKE IT SMALLER ⭐️
+    # ✅ Main Title & subtitle
     st.markdown("""
         <div style='text-align: center;'>
             <h2 style='margin-bottom: 5px;'>Exploring the Mean Age of Suicide Mortality</h2>
@@ -68,15 +73,14 @@ if check_password():
         </div>
     """, unsafe_allow_html=True)
 
-
-    # --- Data Loading ---
+    # ✅ Load data
     @st.cache_data
     def load_data():
         return pd.read_csv("IHME_GBD_2021_SUICIDE_1990_2021_DEATHS_MEAN_AGE_Y2025M02D12_0.csv")
 
     df = load_data()
 
-    # --- Aligned Title Row ---
+    # ✅ Aligned column titles
     title_col1, title_col2, title_col3 = st.columns([0.8, 1.6, 1.6])
     with title_col1:
         st.markdown('<p class="column-title">Controls & Insights</p>', unsafe_allow_html=True)
@@ -85,25 +89,25 @@ if check_password():
     with title_col3:
         st.markdown('<p class="column-title">Mean Age by Location (Map)</p>', unsafe_allow_html=True)
 
-    # --- Main Content Row ---
+    # ✅ Main content columns
     col_left, col_right = st.columns([0.8, 3.2])
 
-    # --- Left Column: Controls & Insights ---
+    # ✅ Left Column: Filters & Insights
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
-        
+
         all_locations = sorted(df['location_name'].unique())
         all_sexes = sorted(df['sex_name'].unique())
         all_years = sorted(df['year_id'].unique())
-        
-        # Initialize session state for all filters on first run
+
+        # Session state default
         if "global_view_checkbox" not in st.session_state:
             st.session_state.global_view_checkbox = False
-            st.session_state.locations_filter = []  # Default to empty
+            st.session_state.locations_filter = []
             st.session_state.sexes_filter = all_sexes
             st.session_state.years_filter = all_years
-        
-        # Reset button logic
+
+        # Reset button
         if st.button("Reset All Filters"):
             st.session_state.global_view_checkbox = False
             st.session_state.locations_filter = []
@@ -115,19 +119,17 @@ if check_password():
         st.checkbox(
             "Show top 12 locations globally",
             key="global_view_checkbox",
-            help="Ignores the 'Location(s)' filter to find the top 12 across all data."
+            help="Ignores the 'Location(s)' filter to find the top 12 globally."
         )
-        
         st.multiselect(
             "Location(s)", all_locations,
             key="locations_filter",
             disabled=st.session_state.global_view_checkbox
         )
-        
         st.multiselect("Sex(es)", all_sexes, key="sexes_filter")
         st.multiselect("Year(s)", all_years, key="years_filter")
-        
-        # Filtering logic using session state
+
+        # ✅ Apply filter logic
         if st.session_state.global_view_checkbox:
             filtered_df = df[
                 df['sex_name'].isin(st.session_state.sexes_filter) &
@@ -142,22 +144,22 @@ if check_password():
 
         st.markdown("<hr style='margin: 0.75rem 0'>", unsafe_allow_html=True)
 
-        # Insights display
+        # ✅ Insights
         if not filtered_df.empty:
             mean_age = filtered_df['val'].mean()
             min_age = filtered_df['val'].min()
             max_age = filtered_df['val'].max()
-            
+
             insights_html = [
                 f"Overall Mean Age: <b>{mean_age:.2f} years</b>",
                 f"Age Range: <b>{min_age:.2f} - {max_age:.2f}</b><br>",
                 "<b>Mean Age by Sex:</b>"
             ]
-            
+
             sex_stats = filtered_df.groupby("sex_name")["val"].mean().reset_index()
             for _, row in sex_stats.iterrows():
                 insights_html.append(f"{row['sex_name']}: <b>{row['val']:.2f} years</b>")
-            
+
             full_insights_html = f"<div class='small-metric'>{'<br>'.join(insights_html)}</div>"
             st.markdown(full_insights_html, unsafe_allow_html=True)
         else:
@@ -165,11 +167,11 @@ if check_password():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- Right Column: Charts ---
+    # ✅ Right Column: Charts
     with col_right:
         chart_col1, chart_col2 = st.columns(2)
 
-        # Bar chart
+        # Top 12 bar
         with chart_col1:
             if not filtered_df.empty:
                 avg_loc = (
@@ -193,11 +195,11 @@ if check_password():
                     )
                     st.plotly_chart(fig_ranked, use_container_width=True)
                 else:
-                    st.warning("No data for ranking chart. Please select a location.")
+                    st.warning("No data for ranking chart.")
             else:
-                st.warning("No data for ranking chart. Please select a location.")
+                st.warning("No data for ranking chart.")
 
-        # Map chart
+        # Map
         with chart_col2:
             if not filtered_df.empty:
                 avg_map = (
@@ -212,13 +214,10 @@ if check_password():
                     labels={"Mean Age": "Mean Age"},
                 )
                 fig_map.update_layout(
-                    mapbox_style="carto-positron",
-                    mapbox_zoom=0.5,
-                    mapbox_center={"lat": 30, "lon": 0},
                     height=500,
                     margin=dict(l=0, r=0, t=0, b=0),
                     title_text=None
                 )
                 st.plotly_chart(fig_map, use_container_width=True)
             else:
-                st.warning("No data for map. Please select a location.")
+                st.warning("No data for map.")
