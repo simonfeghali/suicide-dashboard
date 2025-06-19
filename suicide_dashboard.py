@@ -35,56 +35,21 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Updated CSS for tight filters & no top margin
+    # ✅ Minimal CSS: remove top page padding ONLY — keep multiselect default
     st.markdown("""
         <style>
             .block-container {
-                padding-top: 0.1rem;
-                padding-bottom: 0.5rem;
-                padding-left: 1rem;
-                padding-right: 1rem;
+                padding-top: 0rem !important; /* remove top gap */
             }
-            h2 { margin-top: 0; margin-bottom: 0.3rem; }
+            h2 { margin-top: 0; margin-bottom: 0.5rem; }
             .column-title { font-size: 15px !important; font-weight: bold; text-align: center; margin-top: 0; margin-bottom: 0.2rem; }
-            .small-metric { font-size: 14px !important; line-height: 1.1; }
-
-            /* Compact tags scroll horizontally */
-            div[data-baseweb="tag"] {
-                display: flex;
-                flex-wrap: nowrap !important;
-                overflow-x: auto !important;
-                overflow-y: hidden !important;
-                white-space: nowrap;
-                max-height: 35px;
-            }
-
-            div[data-baseweb="select"] {
-                min-height: 36px !important;
-                font-size: 13px !important;
-                align-items: flex-start !important;
-                margin: 0 0 0.3rem 0 !important;
-            }
-
-            /* Tighter Reset button */
-            div.stButton > button {
-                margin: 0 0 0.3rem 0;
-                padding: 0.35rem 0.9rem;
-                font-size: 13px;
-            }
-
-            /* Tighter checkbox */
-            div[data-testid="stCheckbox"] {
-                margin: 0 0 0.3rem 0;
-            }
-
-            label { font-size: 13px !important; }
-            .left-column { max-width: 240px; padding-right: 8px; }
+            .left-column { max-width: 250px; padding-right: 10px; }
         </style>
     """, unsafe_allow_html=True)
 
     # ✅ Compact Title
     st.markdown("""
-        <div style='text-align: center; margin-bottom: 0.3rem;'>
+        <div style='text-align: center; margin-bottom: 0.5rem;'>
             <h2>Exploring the Mean Age of Suicide Mortality</h2>
             <p style='font-size: 14px; font-style: italic; margin: 0;'>Data Source: IHME GBD 2021</p>
         </div>
@@ -106,7 +71,7 @@ if check_password():
     with title_col3:
         st.markdown('<p class="column-title">Distribution & Boxplot</p>', unsafe_allow_html=True)
 
-    # ✅ Main layout: filters/insights + visuals
+    # ✅ Main layout: filters & insights | visuals
     col_left, col_right = st.columns([0.7, 3.3])
 
     with col_left:
@@ -178,7 +143,7 @@ if check_password():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # ✅ Right: compact plots
+    # ✅ Right: your visuals stay same as before
     with col_right:
         row1_col1, row1_col2 = st.columns(2)
         with row1_col1:
@@ -196,7 +161,7 @@ if check_password():
                     labels={"val": "Mean Age", "location_name": "Location"},
                 )
                 fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
-                fig_ranked.update_layout(height=230, margin=dict(l=5, r=5, t=5, b=5))
+                fig_ranked.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
                 st.plotly_chart(fig_ranked, use_container_width=True)
             else:
                 st.warning("No data for bar chart.")
@@ -214,7 +179,7 @@ if check_password():
                     color="Mean Age", color_continuous_scale="Viridis",
                     labels={"Mean Age": "Mean Age"},
                 )
-                fig_map.update_layout(height=230, margin=dict(l=0, r=0, t=5, b=5))
+                fig_map.update_layout(height=250, margin=dict(l=0, r=0, t=5, b=5))
                 st.plotly_chart(fig_map, use_container_width=True)
             else:
                 st.warning("No data for map.")
@@ -228,7 +193,7 @@ if check_password():
                     nbins=20, color_discrete_sequence=["#636EFA"],
                     labels={"val": "Mean Age"}
                 )
-                fig_hist.update_layout(height=230, margin=dict(l=5, r=5, t=5, b=5))
+                fig_hist.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
                 st.plotly_chart(fig_hist, use_container_width=True)
             else:
                 st.warning("No data for histogram.")
@@ -242,7 +207,7 @@ if check_password():
                     labels={"sex_name": "Sex", "val": "Mean Age"},
                     color_discrete_sequence=px.colors.qualitative.Set1
                 )
-                fig_box.update_layout(height=230, margin=dict(l=5, r=5, t=5, b=5))
+                fig_box.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
                 st.plotly_chart(fig_box, use_container_width=True)
             else:
                 st.warning("No data for boxplot.")
