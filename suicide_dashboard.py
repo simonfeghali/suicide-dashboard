@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 # -------------------------------
-# ✅ 1️⃣ Simple Password Gate
+# ✅ 1️⃣ Password Gate
 # -------------------------------
 def check_password():
     def password_entered():
@@ -27,7 +27,7 @@ def check_password():
 # ✅ 2️⃣ Run if password OK
 # -------------------------------
 if check_password():
-    st.title("📊 Suicide Mean Age Dashboard (Compact View)")
+    st.title("📊 Suicide Mean Age Dashboard (One-Page, Columns Layout)")
 
     @st.cache_data
     def load_data():
@@ -37,18 +37,18 @@ if check_password():
     df = load_data()
 
     # -------------------------------
-    # ✅ 3️⃣ Compact Filters in One Row
+    # ✅ 3️⃣ Filters Row (in Columns)
     # -------------------------------
-    with st.container():
-        col1, col2, col3 = st.columns(3)
-
-        selected_locations = col1.multiselect(
+    filter_container = st.container()
+    with filter_container:
+        fcol1, fcol2, fcol3 = st.columns(3)
+        selected_locations = fcol1.multiselect(
             "Location(s)", sorted(df['location_name'].unique()), default=["Global"]
         )
-        selected_sexes = col2.multiselect(
+        selected_sexes = fcol2.multiselect(
             "Sex(es)", sorted(df['sex_name'].unique()), default=sorted(df['sex_name'].unique())
         )
-        selected_years = col3.multiselect(
+        selected_years = fcol3.multiselect(
             "Year(s)", sorted(df['year_id'].unique()), default=sorted(df['year_id'].unique())
         )
 
@@ -62,34 +62,42 @@ if check_password():
     ]
 
     # -------------------------------
-    # ✅ 5️⃣ Compact Key Insights
+    # ✅ 5️⃣ Insights Row (in Columns)
     # -------------------------------
-    col1, col2 = st.columns(2)
-    col1.metric("Mean Age", f"{filtered_df['val'].mean():.2f} years")
-    col2.metric("Age Range", f"{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}")
+    insights_container = st.container()
+    with insights_container:
+        icol1, icol2 = st.columns(2)
+        icol1.metric("Mean Age", f"{filtered_df['val'].mean():.2f} years")
+        icol2.metric("Age Range", f"{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}")
 
     # -------------------------------
-    # ✅ 6️⃣ Single Trend Chart (no facets)
+    # ✅ 6️⃣ Chart Row
     # -------------------------------
-    if not filtered_df.empty:
-        fig = px.line(
-            filtered_df,
-            x="year_id",
-            y="val",
-            color="sex_name",
-            markers=True,
-            labels={"year_id": "Year", "val": "Mean Age"},
-            title=""
-        )
-        fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20))
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.warning("No data for selected filters.")
+    chart_container = st.container()
+    with chart_container:
+        if not filtered_df.empty:
+            fig = px.line(
+                filtered_df,
+                x="year_id",
+                y="val",
+                color="sex_name",
+                markers=True,
+                labels={"year_id": "Year", "val": "Mean Age"},
+            )
+            fig.update_layout(
+                height=350, margin=dict(l=20, r=20, t=20, b=20),
+                legend_title=None
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("No data for selected filters.")
 
     # -------------------------------
-    # ✅ 7️⃣ Hidden Table (optional)
+    # ✅ 7️⃣ Hidden Table
     # -------------------------------
-    with st.expander("Show Data Table (optional)"):
-        st.dataframe(filtered_df, height=200)
+    table_container = st.container()
+    with table_container:
+        with st.expander("Show Filtered Data Table (optional)"):
+            st.dataframe(filtered_df, height=200)
 
-    st.caption("✅ Compact dashboard • Streamlit • IHME GBD 2021")
+    st.caption("✅ Compact, column-based one-page dashboard • IHME GBD 2021")
