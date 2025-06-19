@@ -27,19 +27,27 @@ def check_password():
 # ✅ 2️⃣ Run if password OK
 # -------------------------------
 if check_password():
-    # ✅ Full width + custom CSS for tight top alignment
     st.set_page_config(layout="wide")
+    # ✅ Custom CSS: tight padding + small metrics + small year selector
     st.markdown(
         """
         <style>
-            .block-container {
-                padding-top: 1rem;
-                padding-bottom: 1rem;
-            }
-            h1 {
-                margin-top: 0rem;
-                margin-bottom: 1rem;
-            }
+        .block-container {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        h1 {
+            margin-top: 0rem;
+            margin-bottom: 1rem;
+        }
+        .small-metric {
+            font-size: 18px !important;
+            color: #fff !important;
+        }
+        div[data-baseweb="select"] {
+            max-height: 150px;
+            overflow-y: auto;
+        }
         </style>
         """,
         unsafe_allow_html=True
@@ -55,12 +63,12 @@ if check_password():
     df = load_data()
 
     # -------------------------------
-    # ✅ Main layout: Left = Filters+Insights stacked, Right = 2 charts side-by-side
+    # ✅ Layout: Left = Filters + Insights | Right = 2 charts
     # -------------------------------
     col_left, col_right = st.columns([1, 3])
 
     # -------------------------------
-    # ✅ Left: Filters & Insights stacked vertically
+    # ✅ Left: Filters & Insights stacked
     # -------------------------------
     with col_left:
         st.subheader("🎛️ Filters")
@@ -70,10 +78,13 @@ if check_password():
         selected_sexes = st.multiselect(
             "Sex(es)", sorted(df['sex_name'].unique()), default=sorted(df['sex_name'].unique())
         )
-        selected_years = st.multiselect(
-            "Year(s)", sorted(df['year_id'].unique()), default=sorted(df['year_id'].unique())
-        )
+        # ✅ Make Year filter small by wrapping in expander OR controlling max height
+        with st.expander("Select Year(s)"):
+            selected_years = st.multiselect(
+                "", sorted(df['year_id'].unique()), default=sorted(df['year_id'].unique())
+            )
 
+        # ✅ Filter data
         filtered_df = df[
             df['location_name'].isin(selected_locations) &
             df['sex_name'].isin(selected_sexes) &
@@ -81,11 +92,11 @@ if check_password():
         ]
 
         st.subheader("📌 Insights")
-        st.metric("Mean Age", f"{filtered_df['val'].mean():.2f} years")
-        st.metric("Age Range", f"{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}")
+        st.markdown(f"<div class='small-metric'>Mean Age: <b>{filtered_df['val'].mean():.2f} years</b></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='small-metric'>Age Range: <b>{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}</b></div>", unsafe_allow_html=True)
 
     # -------------------------------
-    # ✅ Right: 2 charts side-by-side in columns
+    # ✅ Right: 2 charts side-by-side
     # -------------------------------
     with col_right:
         st.subheader("📊 Insights Charts")
@@ -128,6 +139,6 @@ if check_password():
 
     st.markdown(
         "<hr style='margin-top: 20px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Clean Compact Dashboard • IHME GBD 2021</div>",
+        "<div style='text-align: center;'>✅ Compact Dashboard • IHME GBD 2021</div>",
         unsafe_allow_html=True
     )
