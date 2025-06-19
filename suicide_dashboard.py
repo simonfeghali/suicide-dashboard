@@ -29,19 +29,28 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ CSS for compact filter boxes & tighter left column
+    # ✅ CSS: shrink multiselect chips area!
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
             h1 { margin-top: 0; margin-bottom: 1rem; }
             .small-metric { font-size: 16px !important; }
+
+            /* Compact multiselect chips area */
+            div[data-baseweb="tag"] {
+                max-height: 50px;
+                overflow-y: auto;
+                flex-wrap: nowrap;
+            }
             div[data-baseweb="select"] {
-                min-height: 30px !important;
+                min-height: 38px !important;
                 font-size: 14px !important;
             }
             label {
                 font-size: 14px !important;
             }
+
+            /* Compact left column */
             .left-column {
                 max-width: 250px;
                 padding-right: 10px;
@@ -49,7 +58,7 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Compact & Tidy</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Compact Filter Tags</h1>", unsafe_allow_html=True)
 
     @st.cache_data
     def load_data():
@@ -57,7 +66,7 @@ if check_password():
 
     df = load_data()
 
-    # ✅ Make left column narrower: ~20%, right column ~80%
+    # ✅ Narrower left column
     col_left, col_right = st.columns([0.8, 3.2])
 
     with col_left:
@@ -158,6 +167,6 @@ if check_password():
 
     st.markdown(
         "<hr style='margin-top: 20px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Compact, Tighter Filter Panel • IHME GBD 2021</div>",
+        "<div style='text-align: center;'>✅ Filter Tags Stay Compact • IHME GBD 2021</div>",
         unsafe_allow_html=True
     )
