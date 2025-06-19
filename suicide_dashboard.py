@@ -2,9 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# -------------------------------
-# ✅ 1️⃣ Password Gate
-# -------------------------------
+# ✅ 1️⃣ Password
 def check_password():
     def password_entered():
         if st.session_state["password"] == "123456":
@@ -23,34 +21,32 @@ def check_password():
     else:
         return True
 
-# -------------------------------
 # ✅ 2️⃣ Main App
-# -------------------------------
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ CSS: shrink multiselect chips area!
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
             h1 { margin-top: 0; margin-bottom: 1rem; }
             .small-metric { font-size: 16px !important; }
 
-            /* Compact multiselect chips area */
+            /* FIX for multiselect: keep fixed height, scroll inside */
             div[data-baseweb="tag"] {
-                max-height: 50px;
+                max-height: 60px;
                 overflow-y: auto;
-                flex-wrap: nowrap;
+                flex-wrap: wrap;
             }
+
             div[data-baseweb="select"] {
-                min-height: 38px !important;
+                min-height: 40px !important;
                 font-size: 14px !important;
             }
+
             label {
                 font-size: 14px !important;
             }
 
-            /* Compact left column */
             .left-column {
                 max-width: 250px;
                 padding-right: 10px;
@@ -58,7 +54,7 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Compact Filter Tags</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Fixed Box Height</h1>", unsafe_allow_html=True)
 
     @st.cache_data
     def load_data():
@@ -66,7 +62,6 @@ if check_password():
 
     df = load_data()
 
-    # ✅ Narrower left column
     col_left, col_right = st.columns([0.8, 3.2])
 
     with col_left:
@@ -86,7 +81,7 @@ if check_password():
             "Year(s)", sorted(df['year_id'].unique()), default=sorted(df['year_id'].unique())
         )
 
-        # Apply filters
+        # ✅ Filters applied
         filtered_df = df[
             df['location_name'].isin(selected_locations) &
             df['sex_name'].isin(selected_sexes) &
@@ -116,7 +111,7 @@ if check_password():
 
         chart_col1, chart_col2 = st.columns(2)
 
-        # ✅ 1️⃣ Ranked Horizontal Bar: Top 12 Locations
+        # ✅ Ranked bar chart
         with chart_col1:
             st.write("**Top 12 Ranked Mean Age by Location**")
             if not filtered_df.empty:
@@ -142,7 +137,7 @@ if check_password():
             else:
                 st.warning("No data for ranking chart.")
 
-        # ✅ 2️⃣ Choropleth Map
+        # ✅ Map
         with chart_col2:
             st.write("**🌍 Mean Age by Location (Map)**")
             if not filtered_df.empty:
@@ -167,6 +162,6 @@ if check_password():
 
     st.markdown(
         "<hr style='margin-top: 20px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Filter Tags Stay Compact • IHME GBD 2021</div>",
+        "<div style='text-align: center;'>✅ Fixed-Height Filters • IHME GBD 2021</div>",
         unsafe_allow_html=True
     )
