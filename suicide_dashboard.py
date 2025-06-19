@@ -27,7 +27,7 @@ def check_password():
 # ✅ 2️⃣ Run if password OK
 # -------------------------------
 if check_password():
-    st.title("📊 Suicide Mean Age of Death Dashboard")
+    st.title("📊 Suicide Mean Age Dashboard (Compact View)")
 
     @st.cache_data
     def load_data():
@@ -37,32 +37,23 @@ if check_password():
     df = load_data()
 
     # -------------------------------
-    # ✅ 3️⃣ Filters on Main Page
+    # ✅ 3️⃣ Compact Filters in One Row
     # -------------------------------
-    st.header("🎛️ Filters")
+    with st.container():
+        col1, col2, col3 = st.columns(3)
 
-    col1, col2, col3 = st.columns(3)
-
-    selected_locations = col1.multiselect(
-        "Select Location(s):",
-        sorted(df['location_name'].unique()),
-        default=["Global"]
-    )
-
-    selected_sexes = col2.multiselect(
-        "Select Sex(es):",
-        sorted(df['sex_name'].unique()),
-        default=sorted(df['sex_name'].unique())
-    )
-
-    selected_years = col3.multiselect(
-        "Select Year(s):",
-        sorted(df['year_id'].unique()),
-        default=sorted(df['year_id'].unique())
-    )
+        selected_locations = col1.multiselect(
+            "Location(s)", sorted(df['location_name'].unique()), default=["Global"]
+        )
+        selected_sexes = col2.multiselect(
+            "Sex(es)", sorted(df['sex_name'].unique()), default=sorted(df['sex_name'].unique())
+        )
+        selected_years = col3.multiselect(
+            "Year(s)", sorted(df['year_id'].unique()), default=sorted(df['year_id'].unique())
+        )
 
     # -------------------------------
-    # ✅ 4️⃣ Filter DataFrame
+    # ✅ 4️⃣ Filtered Data
     # -------------------------------
     filtered_df = df[
         df['location_name'].isin(selected_locations) &
@@ -71,57 +62,34 @@ if check_password():
     ]
 
     # -------------------------------
-    # ✅ 5️⃣ Show Summary Insights
+    # ✅ 5️⃣ Compact Key Insights
     # -------------------------------
-    st.header("📌 Key Insights")
-
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Records", len(filtered_df))
-    col2.metric("Mean Age", f"{filtered_df['val'].mean():.2f} years")
-    col3.metric("Age Range", f"{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}")
+    col1, col2 = st.columns(2)
+    col1.metric("Mean Age", f"{filtered_df['val'].mean():.2f} years")
+    col2.metric("Age Range", f"{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}")
 
     # -------------------------------
-    # ✅ 6️⃣ Trend Chart with Confidence Intervals
+    # ✅ 6️⃣ Single Trend Chart (no facets)
     # -------------------------------
-    st.header("📈 Mean Age Trend (with Confidence Intervals)")
-
     if not filtered_df.empty:
         fig = px.line(
             filtered_df,
             x="year_id",
             y="val",
             color="sex_name",
-            facet_col="location_name",
-            facet_col_wrap=2,
             markers=True,
             labels={"year_id": "Year", "val": "Mean Age"},
-            title="Mean Age of Death Over Years"
+            title=""
         )
-
-        for loc in filtered_df['location_name'].unique():
-            for sex in filtered_df['sex_name'].unique():
-                subset = filtered_df[
-                    (filtered_df['location_name'] == loc) &
-                    (filtered_df['sex_name'] == sex)
-                ]
-                fig.add_traces(
-                    px.line(
-                        subset, x="year_id", y="upper"
-                    ).update_traces(line=dict(dash="dot"), name=f"{sex} Upper").data +
-                    px.line(
-                        subset, x="year_id", y="lower"
-                    ).update_traces(line=dict(dash="dot"), name=f"{sex} Lower").data
-                )
-
+        fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20))
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.warning("No data available for selected filters.")
+        st.warning("No data for selected filters.")
 
     # -------------------------------
-    # ✅ 7️⃣ Show Filtered Data Table (optional)
+    # ✅ 7️⃣ Hidden Table (optional)
     # -------------------------------
-    with st.expander("🔍 Show Filtered Data Table"):
-        st.dataframe(filtered_df)
+    with st.expander("Show Data Table (optional)"):
+        st.dataframe(filtered_df, height=200)
 
-    st.markdown("---")
-    st.markdown("✅ Built with ❤️ using Streamlit | Data: IHME GBD 2021")
+    st.caption("✅ Compact dashboard • Streamlit • IHME GBD 2021")
