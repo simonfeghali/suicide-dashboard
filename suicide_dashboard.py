@@ -29,13 +29,21 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # CSS for single-line multiselects
+    # ⭐️ CHANGE 1: UPDATED CSS FOR SMALLER TEXT AND TIGHTER SPACING ⭐️
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
             h1 { margin-top: 0; margin-bottom: 1rem; }
-            .small-metric { font-size: 16px !important; }
+            h3 { font-size: 18px !important; margin-bottom: 0.5rem !important; }
 
+            /* Tighter spacing for insight text */
+            .small-metric {
+                font-size: 15px !important;
+                margin-bottom: 2px !important; /* Reduces space between lines */
+                line-height: 1.2;
+            }
+
+            /* Single-line multiselect styles */
             div[data-baseweb="select"] > div:first-child {
                 flex-wrap: nowrap !important;
                 overflow-x: auto !important;
@@ -50,7 +58,7 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Single Row Filters</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Suicide Mean Age Dashboard — Single Row Filters</h1>", unsafe_allow_html=True)
 
     @st.cache_data
     def load_data():
@@ -63,8 +71,8 @@ if check_password():
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
         
-        # ⭐️ CHANGE 1: A single title for the entire left column
-        st.subheader("🎛️ Controls & Insights")
+        # Title without emoji
+        st.subheader("Controls & Insights")
 
         # --- Filter Widgets ---
         all_locations = sorted(df['location_name'].unique())
@@ -90,8 +98,8 @@ if check_password():
                 df['year_id'].isin(selected_years)
             ]
 
-        # ⭐️ CHANGE 2: A subtle line to separate controls from insights
-        st.markdown("<hr style='margin: 1.5rem 0'>", unsafe_allow_html=True)
+        # ⭐️ CHANGE 2: REDUCED MARGIN ON THE SEPARATOR LINE ⭐️
+        st.markdown("<hr style='margin: 0.75rem 0'>", unsafe_allow_html=True)
 
         # --- Insights Display ---
         if not filtered_df.empty:
@@ -100,6 +108,8 @@ if check_password():
             max_age = filtered_df['val'].max()
             st.markdown(f"<div class='small-metric'>Overall Mean Age: <b>{mean_age:.2f} years</b></div>", unsafe_allow_html=True)
             st.markdown(f"<div class='small-metric'>Age Range: <b>{min_age:.2f} - {max_age:.2f}</b></div>", unsafe_allow_html=True)
+            
+            # This section will now appear tighter due to the CSS changes
             st.markdown("<b>Mean Age by Sex:</b>", unsafe_allow_html=True)
             sex_stats = filtered_df.groupby("sex_name")["val"].mean().reset_index()
             for _, row in sex_stats.iterrows():
@@ -138,7 +148,8 @@ if check_password():
                 st.warning("No data for ranking chart.")
 
         with chart_col2:
-            st.write("**🌍 Mean Age by Location (Map)**")
+            # Title without emoji
+            st.write("**Mean Age by Location (Map)**")
             if not filtered_df.empty:
                 avg_map = (
                     filtered_df.groupby("location_name")["val"]
@@ -155,4 +166,4 @@ if check_password():
             else:
                 st.warning("No data for map.")
 
-    st.markdown("<hr><div style='text-align: center;'>✅ Single Row Filters • IHME GBD 2021</div>", unsafe_allow_html=True)
+    st.markdown("<hr><div style='text-align: center;'>Single Row Filters • IHME GBD 2021</div>", unsafe_allow_html=True)
