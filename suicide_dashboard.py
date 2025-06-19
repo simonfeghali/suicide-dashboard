@@ -35,7 +35,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ CSS — only remove top padding, keep normal sizes
+    # ✅ New CSS for smaller filter boxes
     st.markdown("""
         <style>
             .block-container {
@@ -51,22 +51,47 @@ if check_password():
                 max-width: 250px;
                 padding-right: 10px;
             }
+
+            /* ✅ Make multiselect input smaller */
+            div[data-baseweb="select"] {
+                min-height: 32px !important;
+                font-size: 12px !important;
+            }
+
+            div[data-baseweb="tag"] {
+                font-size: 12px !important;
+                padding: 0 4px !important;
+                height: 24px !important;
+            }
+
+            span[data-baseweb="tag"] {
+                margin: 2px 2px !important;
+            }
+
+            /* Smaller checkbox & button too */
+            div[data-testid="stCheckbox"] {
+                margin: 0 0 0.2rem 0;
+            }
+
+            div.stButton > button {
+                font-size: 12px !important;
+                padding: 0.25rem 0.7rem;
+                margin-bottom: 0.3rem;
+            }
+
+            label { font-size: 12px !important; }
         </style>
     """, unsafe_allow_html=True)
 
     # ✅ MAIN 2 COLUMN LAYOUT:
-    # Left: Filters & Insights
-    # Right: Title + Plots
     col_left, col_right = st.columns([0.7, 3.3])
 
-    # ✅ LEFT COLUMN — FLUSH TOP NOW
+    # ✅ LEFT COLUMN — FLUSH TOP NOW, COMPACT FILTERS
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
 
-        # All your controls
         st.markdown('<p class="column-title">Controls & Insights</p>', unsafe_allow_html=True)
 
-        # Data
         @st.cache_data
         def load_data():
             return pd.read_csv("IHME_GBD_2021_SUICIDE_1990_2021_DEATHS_MEAN_AGE_Y2025M02D12_0.csv")
@@ -77,7 +102,6 @@ if check_password():
         all_sexes = sorted(df['sex_name'].unique())
         all_years = sorted(df['year_id'].unique())
 
-        # Session state init
         if "global_view_checkbox" not in st.session_state:
             st.session_state.global_view_checkbox = False
             st.session_state.locations_filter = []
@@ -104,7 +128,6 @@ if check_password():
         st.multiselect("Sex(es)", all_sexes, key="sexes_filter")
         st.multiselect("Year(s)", all_years, key="years_filter")
 
-        # Filtered data
         if st.session_state.global_view_checkbox:
             filtered_df = df[
                 df['sex_name'].isin(st.session_state.sexes_filter) &
@@ -142,7 +165,6 @@ if check_password():
 
     # ✅ RIGHT COLUMN — TITLE + PLOTS
     with col_right:
-        # Put title INSIDE right column only!
         st.markdown("""
             <div style='text-align: center; margin-bottom: 0.5rem;'>
                 <h2>Exploring the Mean Age of Suicide Mortality</h2>
