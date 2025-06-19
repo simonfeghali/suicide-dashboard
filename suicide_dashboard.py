@@ -27,7 +27,7 @@ def check_password():
 # ✅ 2️⃣ Run if password OK
 # -------------------------------
 if check_password():
-    st.title("📊 Suicide Mean Age Dashboard (One-Page, Columns Layout)")
+    st.title("📊 Suicide Mean Age Dashboard (Three Columns Layout)")
 
     @st.cache_data
     def load_data():
@@ -37,23 +37,27 @@ if check_password():
     df = load_data()
 
     # -------------------------------
-    # ✅ 3️⃣ Filters Row (in Columns)
+    # ✅ 3️⃣ Create 3 side-by-side columns
     # -------------------------------
-    filter_container = st.container()
-    with filter_container:
-        fcol1, fcol2, fcol3 = st.columns(3)
-        selected_locations = fcol1.multiselect(
+    col1, col2, col3 = st.columns([1, 1, 2])  # make chart column a bit wider
+
+    # -------------------------------
+    # ✅ Column 1: Filters stacked vertically
+    # -------------------------------
+    with col1:
+        st.header("🎛️ Filters")
+        selected_locations = st.multiselect(
             "Location(s)", sorted(df['location_name'].unique()), default=["Global"]
         )
-        selected_sexes = fcol2.multiselect(
+        selected_sexes = st.multiselect(
             "Sex(es)", sorted(df['sex_name'].unique()), default=sorted(df['sex_name'].unique())
         )
-        selected_years = fcol3.multiselect(
+        selected_years = st.multiselect(
             "Year(s)", sorted(df['year_id'].unique()), default=sorted(df['year_id'].unique())
         )
 
     # -------------------------------
-    # ✅ 4️⃣ Filtered Data
+    # ✅ Filtered Data
     # -------------------------------
     filtered_df = df[
         df['location_name'].isin(selected_locations) &
@@ -62,19 +66,18 @@ if check_password():
     ]
 
     # -------------------------------
-    # ✅ 5️⃣ Insights Row (in Columns)
+    # ✅ Column 2: Insights stacked vertically
     # -------------------------------
-    insights_container = st.container()
-    with insights_container:
-        icol1, icol2 = st.columns(2)
-        icol1.metric("Mean Age", f"{filtered_df['val'].mean():.2f} years")
-        icol2.metric("Age Range", f"{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}")
+    with col2:
+        st.header("📌 Insights")
+        st.metric("Mean Age", f"{filtered_df['val'].mean():.2f} years")
+        st.metric("Age Range", f"{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}")
 
     # -------------------------------
-    # ✅ 6️⃣ Chart Row
+    # ✅ Column 3: Chart (and optional table)
     # -------------------------------
-    chart_container = st.container()
-    with chart_container:
+    with col3:
+        st.header("📈 Chart")
         if not filtered_df.empty:
             fig = px.line(
                 filtered_df,
@@ -85,19 +88,15 @@ if check_password():
                 labels={"year_id": "Year", "val": "Mean Age"},
             )
             fig.update_layout(
-                height=350, margin=dict(l=20, r=20, t=20, b=20),
+                height=450, margin=dict(l=10, r=10, t=30, b=10),
                 legend_title=None
             )
             st.plotly_chart(fig, use_container_width=True)
         else:
             st.warning("No data for selected filters.")
 
-    # -------------------------------
-    # ✅ 7️⃣ Hidden Table
-    # -------------------------------
-    table_container = st.container()
-    with table_container:
-        with st.expander("Show Filtered Data Table (optional)"):
+        # Optional: table in same column
+        with st.expander("Show Filtered Data Table"):
             st.dataframe(filtered_df, height=200)
 
-    st.caption("✅ Compact, column-based one-page dashboard • IHME GBD 2021")
+    st.caption("✅ One-page, three-columns dashboard • IHME GBD 2021")
