@@ -62,8 +62,11 @@ if check_password():
 
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
-        st.subheader("🎛️ Filters")
+        
+        # ⭐️ CHANGE 1: A single title for the entire left column
+        st.subheader("🎛️ Controls & Insights")
 
+        # --- Filter Widgets ---
         all_locations = sorted(df['location_name'].unique())
         all_sexes = sorted(df['sex_name'].unique())
         all_years = sorted(df['year_id'].unique())
@@ -72,25 +75,25 @@ if check_password():
         selected_sexes = st.multiselect("Sex(es)", all_sexes, default=all_sexes)
         selected_years = st.multiselect("Year(s)", all_years, default=all_years)
         
-        # Checkbox without the header
         show_global_top = st.checkbox("Show top 12 locations globally", help="Ignores the 'Location(s)' filter to find the top 12 across all data.")
 
-        # Conditionally filter the DataFrame
+        # --- Data Filtering Logic ---
         if show_global_top:
-            # If checkbox is ticked, ignore the location filter
             filtered_df = df[
                 df['sex_name'].isin(selected_sexes) &
                 df['year_id'].isin(selected_years)
             ]
         else:
-            # Otherwise, use all three filters
             filtered_df = df[
                 df['location_name'].isin(selected_locations) &
                 df['sex_name'].isin(selected_sexes) &
                 df['year_id'].isin(selected_years)
             ]
 
-        st.subheader("📌 Insights")
+        # ⭐️ CHANGE 2: A subtle line to separate controls from insights
+        st.markdown("<hr style='margin: 1.5rem 0'>", unsafe_allow_html=True)
+
+        # --- Insights Display ---
         if not filtered_df.empty:
             mean_age = filtered_df['val'].mean()
             min_age = filtered_df['val'].min()
@@ -107,7 +110,6 @@ if check_password():
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col_right:
-        # Header for the right column removed
         chart_col1, chart_col2 = st.columns(2)
 
         with chart_col1:
