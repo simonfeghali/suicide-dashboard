@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 # -------------------------------
-# ✅ 1️⃣ Password Gate (same)
+# ✅ 1️⃣ Simple Password Gate
 # -------------------------------
 def check_password():
     def password_entered():
@@ -27,7 +27,7 @@ def check_password():
 # ✅ 2️⃣ Run if password OK
 # -------------------------------
 if check_password():
-    st.title("📊 Suicide Mean Age of Death Dashboard (Custom Filters)")
+    st.title("📊 Suicide Mean Age of Death Dashboard")
 
     @st.cache_data
     def load_data():
@@ -37,23 +37,25 @@ if check_password():
     df = load_data()
 
     # -------------------------------
-    # ✅ 3️⃣ Sidebar Filters — all multi-select
+    # ✅ 3️⃣ Filters on Main Page
     # -------------------------------
-    st.sidebar.header("🎛️ Filters")
+    st.header("🎛️ Filters")
 
-    selected_locations = st.sidebar.multiselect(
+    col1, col2, col3 = st.columns(3)
+
+    selected_locations = col1.multiselect(
         "Select Location(s):",
         sorted(df['location_name'].unique()),
         default=["Global"]
     )
 
-    selected_sexes = st.sidebar.multiselect(
+    selected_sexes = col2.multiselect(
         "Select Sex(es):",
         sorted(df['sex_name'].unique()),
         default=sorted(df['sex_name'].unique())
     )
 
-    selected_years = st.sidebar.multiselect(
+    selected_years = col3.multiselect(
         "Select Year(s):",
         sorted(df['year_id'].unique()),
         default=sorted(df['year_id'].unique())
@@ -71,7 +73,7 @@ if check_password():
     # -------------------------------
     # ✅ 5️⃣ Show Summary Insights
     # -------------------------------
-    st.subheader("📌 Key Insights for Current Filters")
+    st.header("📌 Key Insights")
 
     col1, col2, col3 = st.columns(3)
     col1.metric("Records", len(filtered_df))
@@ -81,7 +83,7 @@ if check_password():
     # -------------------------------
     # ✅ 6️⃣ Trend Chart with Confidence Intervals
     # -------------------------------
-    st.subheader("📈 Mean Age Trend (with CI)")
+    st.header("📈 Mean Age Trend (with Confidence Intervals)")
 
     if not filtered_df.empty:
         fig = px.line(
@@ -93,10 +95,9 @@ if check_password():
             facet_col_wrap=2,
             markers=True,
             labels={"year_id": "Year", "val": "Mean Age"},
-            title="Mean Age of Death Over Years (by Sex & Location)"
+            title="Mean Age of Death Over Years"
         )
 
-        # Add CI ribbon (upper & lower)
         for loc in filtered_df['location_name'].unique():
             for sex in filtered_df['sex_name'].unique():
                 subset = filtered_df[
@@ -117,7 +118,7 @@ if check_password():
         st.warning("No data available for selected filters.")
 
     # -------------------------------
-    # ✅ 7️⃣ Show Filtered Table (optional)
+    # ✅ 7️⃣ Show Filtered Data Table (optional)
     # -------------------------------
     with st.expander("🔍 Show Filtered Data Table"):
         st.dataframe(filtered_df)
