@@ -35,40 +35,50 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ New CSS for smaller filter boxes
+    # ✅ Polished CSS: small multiselects, single row, scroll, small chips
     st.markdown("""
         <style>
             .block-container {
                 padding-top: 0rem !important;
             }
+
             .column-title {
                 font-size: 16px !important;
                 font-weight: bold;
                 text-align: center;
                 margin-bottom: 0.2rem;
             }
+
             .left-column {
                 max-width: 250px;
                 padding-right: 10px;
             }
 
-            /* ✅ Make multiselect input smaller */
+            /* Shrink multiselect input box */
             div[data-baseweb="select"] {
-                min-height: 32px !important;
+                min-height: 36px !important;
                 font-size: 12px !important;
             }
 
+            /* Single line, horizontal scroll for tags */
             div[data-baseweb="tag"] {
-                font-size: 12px !important;
-                padding: 0 4px !important;
-                height: 24px !important;
+                display: flex;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                white-space: nowrap;
+                max-height: 32px !important;
             }
 
+            /* Individual tag chip smaller */
             span[data-baseweb="tag"] {
-                margin: 2px 2px !important;
+                font-size: 11px !important;
+                height: 22px !important;
+                margin: 1px !important;
+                padding: 2px 4px !important;
             }
 
-            /* Smaller checkbox & button too */
+            /* Smaller checkboxes & reset button */
             div[data-testid="stCheckbox"] {
                 margin: 0 0 0.2rem 0;
             }
@@ -79,17 +89,18 @@ if check_password():
                 margin-bottom: 0.3rem;
             }
 
-            label { font-size: 12px !important; }
+            label {
+                font-size: 12px !important;
+            }
         </style>
     """, unsafe_allow_html=True)
 
     # ✅ MAIN 2 COLUMN LAYOUT:
     col_left, col_right = st.columns([0.7, 3.3])
 
-    # ✅ LEFT COLUMN — FLUSH TOP NOW, COMPACT FILTERS
+    # ✅ LEFT COLUMN — FLUSH TOP, COMPACT FILTERS
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
-
         st.markdown('<p class="column-title">Controls & Insights</p>', unsafe_allow_html=True)
 
         @st.cache_data
