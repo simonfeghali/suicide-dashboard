@@ -35,52 +35,49 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Minimal CSS: remove top page padding ONLY — keep multiselect default
+    # ✅ CSS — only remove top padding, keep normal sizes
     st.markdown("""
         <style>
             .block-container {
-                padding-top: 0rem !important; /* remove top gap */
+                padding-top: 0rem !important;
             }
-            h2 { margin-top: 0; margin-bottom: 0.5rem; }
-            .column-title { font-size: 15px !important; font-weight: bold; text-align: center; margin-top: 0; margin-bottom: 0.2rem; }
-            .left-column { max-width: 250px; padding-right: 10px; }
+            .column-title {
+                font-size: 16px !important;
+                font-weight: bold;
+                text-align: center;
+                margin-bottom: 0.2rem;
+            }
+            .left-column {
+                max-width: 250px;
+                padding-right: 10px;
+            }
         </style>
     """, unsafe_allow_html=True)
 
-    # ✅ Compact Title
-    st.markdown("""
-        <div style='text-align: center; margin-bottom: 0.5rem;'>
-            <h2>Exploring the Mean Age of Suicide Mortality</h2>
-            <p style='font-size: 14px; font-style: italic; margin: 0;'>Data Source: IHME GBD 2021</p>
-        </div>
-    """, unsafe_allow_html=True)
-
-    # ✅ Load data
-    @st.cache_data
-    def load_data():
-        return pd.read_csv("IHME_GBD_2021_SUICIDE_1990_2021_DEATHS_MEAN_AGE_Y2025M02D12_0.csv")
-
-    df = load_data()
-
-    # ✅ Aligned column titles
-    title_col1, title_col2, title_col3 = st.columns([0.7, 1.7, 1.7])
-    with title_col1:
-        st.markdown('<p class="column-title">Controls & Insights</p>', unsafe_allow_html=True)
-    with title_col2:
-        st.markdown('<p class="column-title">Ranked & Map</p>', unsafe_allow_html=True)
-    with title_col3:
-        st.markdown('<p class="column-title">Distribution & Boxplot</p>', unsafe_allow_html=True)
-
-    # ✅ Main layout: filters & insights | visuals
+    # ✅ MAIN 2 COLUMN LAYOUT:
+    # Left: Filters & Insights
+    # Right: Title + Plots
     col_left, col_right = st.columns([0.7, 3.3])
 
+    # ✅ LEFT COLUMN — FLUSH TOP NOW
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
+
+        # All your controls
+        st.markdown('<p class="column-title">Controls & Insights</p>', unsafe_allow_html=True)
+
+        # Data
+        @st.cache_data
+        def load_data():
+            return pd.read_csv("IHME_GBD_2021_SUICIDE_1990_2021_DEATHS_MEAN_AGE_Y2025M02D12_0.csv")
+
+        df = load_data()
 
         all_locations = sorted(df['location_name'].unique())
         all_sexes = sorted(df['sex_name'].unique())
         all_years = sorted(df['year_id'].unique())
 
+        # Session state init
         if "global_view_checkbox" not in st.session_state:
             st.session_state.global_view_checkbox = False
             st.session_state.locations_filter = []
@@ -107,7 +104,7 @@ if check_password():
         st.multiselect("Sex(es)", all_sexes, key="sexes_filter")
         st.multiselect("Year(s)", all_years, key="years_filter")
 
-        # ✅ Filtered data
+        # Filtered data
         if st.session_state.global_view_checkbox:
             filtered_df = df[
                 df['sex_name'].isin(st.session_state.sexes_filter) &
@@ -143,8 +140,16 @@ if check_password():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # ✅ Right: your visuals stay same as before
+    # ✅ RIGHT COLUMN — TITLE + PLOTS
     with col_right:
+        # Put title INSIDE right column only!
+        st.markdown("""
+            <div style='text-align: center; margin-bottom: 0.5rem;'>
+                <h2>Exploring the Mean Age of Suicide Mortality</h2>
+                <p style='font-size: 14px; font-style: italic; margin: 0;'>Data Source: IHME GBD 2021</p>
+            </div>
+        """, unsafe_allow_html=True)
+
         row1_col1, row1_col2 = st.columns(2)
         with row1_col1:
             st.write("**Top 12 Ranked Mean Age by Location**")
