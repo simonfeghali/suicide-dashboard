@@ -42,8 +42,8 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    # ⭐️ NEW, MORE SCIENTIFIC TITLE IS HERE ⭐️
-    st.markdown("<h1 style='text-align: center;'>Spatiotemporal Analysis of Mean Age at Death from Suicide (1990-2021)</h1>", unsafe_allow_html=True)
+    # ⭐️ THE TITLE HAS BEEN UPDATED AS REQUESTED ⭐️
+    st.markdown("<h1 style='text-align: center;'>Exploring the Mean Age of Suicide Mortality</h1>", unsafe_allow_html=True)
 
     @st.cache_data
     def load_data():
@@ -172,4 +172,4 @@ if check_password():
             else:
                 st.warning("No data for map.")
 
-    st.markdown("<hr><div style='text-align: center;'>IHME GBD 2021</div>", unsafe_allow_html=True)
+    st.markdown("<hr><div style='text-align: center;'>Data Source: IHME GBD 2021</div>", unsafe_allow_html=True)
