@@ -43,7 +43,7 @@ if check_password():
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
-            h1 { margin-top: 0; margin-bottom: 1rem; }
+            h2 { margin-top: 0; } /* Adjusted for smaller h2 title */
             .small-metric { font-size: 15px !important; line-height: 1.2; }
             .column-title { font-size: 16px !important; font-weight: bold; text-align: center; margin-bottom: 0px; }
             /* Single-line multiselect styles */
@@ -60,12 +60,14 @@ if check_password():
     """, unsafe_allow_html=True)
 
     # --- Main Title with Data Source Subtitle ---
+    # ⭐️ THE TITLE TAG HAS BEEN CHANGED FROM <h1> to <h2> TO MAKE IT SMALLER ⭐️
     st.markdown("""
         <div style='text-align: center;'>
-            <h1 style='margin-bottom: 5px;'>Exploring the Mean Age of Suicide Mortality</h1>
+            <h2 style='margin-bottom: 5px;'>Exploring the Mean Age of Suicide Mortality</h2>
             <p style='font-size: 16px; font-style: italic;'>Data Source: IHME GBD 2021</p>
         </div>
     """, unsafe_allow_html=True)
+
 
     # --- Data Loading ---
     @st.cache_data
