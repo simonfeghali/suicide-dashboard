@@ -3,54 +3,78 @@ import pandas as pd
 import plotly.express as px
 
 # -------------------------------
-# ✅ 1️⃣ Password Gate
+# 1. Password Gate
 # -------------------------------
 def check_password():
+    """Returns `True` if the user has the correct password."""
+
     def password_entered():
+        """Checks whether a password entered by the user is correct."""
         if st.session_state["password"] == "123456":
             st.session_state["password_correct"] = True
-            del st.session_state["password"]
+            del st.session_state["password"]  # Don't store password.
         else:
             st.session_state["password_correct"] = False
 
     if "password_correct" not in st.session_state:
-        st.text_input("🔒 Enter password:", type="password", on_change=password_entered, key="password")
+        # First run, show input for password.
+        st.text_input(
+            "🔒 Enter password:", type="password", on_change=password_entered, key="password"
+        )
         return False
     elif not st.session_state["password_correct"]:
-        st.text_input("🔒 Enter password:", type="password", on_change=password_entered, key="password")
+        # Password not correct, show input + error.
+        st.text_input(
+            "🔒 Enter password:", type="password", on_change=password_entered, key="password"
+        )
         st.error("❌ Wrong password")
         return False
     else:
+        # Password correct.
         return True
 
 # -------------------------------
-# ✅ 2️⃣ Main App
+# 2. Main App
 # -------------------------------
 if check_password():
     st.set_page_config(layout="wide")
 
+    # --- Custom CSS for styling ---
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
             h1 { margin-top: 0; margin-bottom: 1rem; }
             .small-metric { font-size: 15px !important; line-height: 1.2; }
             .column-title { font-size: 16px !important; font-weight: bold; text-align: center; margin-bottom: 0px; }
+            /* Single-line multiselect styles */
             div[data-baseweb="select"] > div:first-child { flex-wrap: nowrap !important; overflow-x: auto !important; }
-            div[data-baseweb="select"] { max-height: 50px; overflow-y: hidden; font-size: 14px !important; align-items: flex-start !important; }
+            div[data-baseweb="select"] {
+                max-height: 50px;
+                overflow-y: hidden;
+                font-size: 14px !important;
+                align-items: flex-start !important; /* Forces icons to stay at the top */
+            }
             label { font-size: 14px !important; }
             .left-column { max-width: 250px; padding-right: 10px; }
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h1 style='text-align: center;'>Exploring the Mean Age of Suicide Mortality</h1>", unsafe_allow_html=True)
+    # --- Main Title with Data Source Subtitle ---
+    st.markdown("""
+        <div style='text-align: center;'>
+            <h1 style='margin-bottom: 5px;'>Exploring the Mean Age of Suicide Mortality</h1>
+            <p style='font-size: 16px; font-style: italic;'>Data Source: IHME GBD 2021</p>
+        </div>
+    """, unsafe_allow_html=True)
 
+    # --- Data Loading ---
     @st.cache_data
     def load_data():
         return pd.read_csv("IHME_GBD_2021_SUICIDE_1990_2021_DEATHS_MEAN_AGE_Y2025M02D12_0.csv")
 
     df = load_data()
 
-    # --- Title Row ---
+    # --- Aligned Title Row ---
     title_col1, title_col2, title_col3 = st.columns([0.8, 1.6, 1.6])
     with title_col1:
         st.markdown('<p class="column-title">Controls & Insights</p>', unsafe_allow_html=True)
@@ -59,9 +83,10 @@ if check_password():
     with title_col3:
         st.markdown('<p class="column-title">Mean Age by Location (Map)</p>', unsafe_allow_html=True)
 
-    # --- Content Row ---
+    # --- Main Content Row ---
     col_left, col_right = st.columns([0.8, 3.2])
 
+    # --- Left Column: Controls & Insights ---
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
         
@@ -69,28 +94,28 @@ if check_password():
         all_sexes = sorted(df['sex_name'].unique())
         all_years = sorted(df['year_id'].unique())
         
-        # ⭐️ CHANGE 1: Initialize session state for all filters if they don't exist
+        # Initialize session state for all filters on first run
         if "global_view_checkbox" not in st.session_state:
             st.session_state.global_view_checkbox = False
-            st.session_state.locations_filter = [] # Start with empty locations
+            st.session_state.locations_filter = []  # Default to empty
             st.session_state.sexes_filter = all_sexes
             st.session_state.years_filter = all_years
         
         # Reset button logic
         if st.button("Reset All Filters"):
             st.session_state.global_view_checkbox = False
-            st.session_state.locations_filter = [] # ⭐️ CHANGE 2: Reset locations to empty
+            st.session_state.locations_filter = []
             st.session_state.sexes_filter = all_sexes
             st.session_state.years_filter = all_years
             st.rerun()
 
+        # Filter widgets bound to session state
         st.checkbox(
             "Show top 12 locations globally",
             key="global_view_checkbox",
             help="Ignores the 'Location(s)' filter to find the top 12 across all data."
         )
         
-        # ⭐️ CHANGE 3: Widgets now use the keys initialized above. No 'default' needed.
         st.multiselect(
             "Location(s)", all_locations,
             key="locations_filter",
@@ -100,6 +125,7 @@ if check_password():
         st.multiselect("Sex(es)", all_sexes, key="sexes_filter")
         st.multiselect("Year(s)", all_years, key="years_filter")
         
+        # Filtering logic using session state
         if st.session_state.global_view_checkbox:
             filtered_df = df[
                 df['sex_name'].isin(st.session_state.sexes_filter) &
@@ -114,6 +140,7 @@ if check_password():
 
         st.markdown("<hr style='margin: 0.75rem 0'>", unsafe_allow_html=True)
 
+        # Insights display
         if not filtered_df.empty:
             mean_age = filtered_df['val'].mean()
             min_age = filtered_df['val'].min()
@@ -136,9 +163,11 @@ if check_password():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
+    # --- Right Column: Charts ---
     with col_right:
         chart_col1, chart_col2 = st.columns(2)
 
+        # Bar chart
         with chart_col1:
             if not filtered_df.empty:
                 avg_loc = (
@@ -166,6 +195,7 @@ if check_password():
             else:
                 st.warning("No data for ranking chart. Please select a location.")
 
+        # Map chart
         with chart_col2:
             if not filtered_df.empty:
                 avg_map = (
@@ -190,5 +220,3 @@ if check_password():
                 st.plotly_chart(fig_map, use_container_width=True)
             else:
                 st.warning("No data for map. Please select a location.")
-
-    st.markdown("<hr><div style='text-align: center;'>Data Source: IHME GBD 2021</div>", unsafe_allow_html=True)
