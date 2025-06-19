@@ -29,14 +29,23 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
+    # ⭐️ CHANGE 1: ADDED 'align-items' TO FIX THE ICON POSITION ⭐️
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
             h1 { margin-top: 0; margin-bottom: 1rem; }
             .small-metric { font-size: 15px !important; line-height: 1.2; }
             .column-title { font-size: 16px !important; font-weight: bold; text-align: center; margin-bottom: 0px; }
+
+            /* Single-line multiselect styles */
             div[data-baseweb="select"] > div:first-child { flex-wrap: nowrap !important; overflow-x: auto !important; }
-            div[data-baseweb="select"] { max-height: 50px; overflow-y: hidden; font-size: 14px !important; }
+
+            div[data-baseweb="select"] {
+                max-height: 50px;
+                overflow-y: hidden;
+                font-size: 14px !important;
+                align-items: flex-start !important; /* This forces icons to the top */
+            }
             label { font-size: 14px !important; }
             .left-column { max-width: 250px; padding-right: 10px; }
         </style>
@@ -71,11 +80,25 @@ if check_password():
         
         show_global_top = st.checkbox("Show top 12 locations globally", help="Ignores the 'Location(s)' filter to find the top 12 across all data.")
 
+        # ⭐️ CHANGE 2: RESTORED DEFAULTS TO MAKE THE 'X' BUTTONS APPEAR
         selected_locations = st.multiselect(
-            "Location(s)", all_locations, default=["Global"], disabled=show_global_top
+            "Location(s)",
+            all_locations,
+            default=all_locations,
+            disabled=show_global_top
         )
-        selected_sexes = st.multiselect("Sex(es)", all_sexes, default=["Both"])
-        selected_years = st.multiselect("Year(s)", all_years, default=[max(all_years)])
+        
+        selected_sexes = st.multiselect(
+            "Sex(es)",
+            all_sexes,
+            default=all_sexes
+        )
+        
+        selected_years = st.multiselect(
+            "Year(s)",
+            all_years,
+            default=all_years
+        )
         
         if show_global_top:
             filtered_df = df[df['sex_name'].isin(selected_sexes) & df['year_id'].isin(selected_years)]
@@ -153,11 +176,10 @@ if check_password():
                     color_continuous_scale="Viridis",
                     labels={"Mean Age": "Mean Age"},
                 )
-                # ⭐️ THIS IS THE CHANGE FOR THE PROFESSIONAL MAP BACKGROUND ⭐️
                 fig_map.update_layout(
-                    mapbox_style="carto-positron", # Adds the professional background
-                    mapbox_zoom=0.5, # Optional: Adjust zoom level
-                    mapbox_center={"lat": 30, "lon": 0}, # Optional: Center the map
+                    mapbox_style="carto-positron",
+                    mapbox_zoom=0.5,
+                    mapbox_center={"lat": 30, "lon": 0},
                     height=500,
                     margin=dict(l=0, r=0, t=0, b=0),
                     title_text=None
