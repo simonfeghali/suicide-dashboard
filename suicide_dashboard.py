@@ -38,7 +38,7 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Final Polished</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Final with Top 12 Ranking</h1>", unsafe_allow_html=True)
 
     @st.cache_data
     def load_data():
@@ -46,7 +46,7 @@ if check_password():
 
     df = load_data()
 
-    # Layout: Left filters & insights | Right: 2 final plots
+    # Layout: Left filters & insights | Right: 2 plots
     col_left, col_right = st.columns([1, 3])
 
     with col_left:
@@ -74,11 +74,11 @@ if check_password():
         st.markdown(f"<div class='small-metric'>Age Range: <b>{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}</b></div>", unsafe_allow_html=True)
 
     with col_right:
-        st.subheader("📊 Final Insights")
+        st.subheader("📊 Insights")
 
         chart_col1, chart_col2 = st.columns(2)
 
-        # ✅ 1️⃣ Basic Mean Age by Sex (no year)
+        # ✅ 1️⃣ Basic Mean Age by Sex
         with chart_col1:
             st.write("**Mean Age by Sex**")
             if not filtered_df.empty:
@@ -98,16 +98,17 @@ if check_password():
             else:
                 st.warning("No data for sex chart.")
 
-        # ✅ 2️⃣ Sorted Horizontal Bar: Mean Age by Location (with dynamic height)
+        # ✅ 2️⃣ Sorted Horizontal Bar: Mean Age by Location — SHOW ONLY TOP 12!
         with chart_col2:
-            st.write("**Ranked Mean Age by Location**")
+            st.write("**Top 12 Ranked Mean Age by Location**")
             if not filtered_df.empty:
                 avg_loc = (
                     filtered_df.groupby("location_name")["val"]
                     .mean().reset_index()
                     .sort_values("val", ascending=True)
+                    .head(12)  # ✅ LIMIT TO TOP 12 ONLY
                 )
-                # Auto height: 30 px per location + base
+                # Dynamic height based on # of bars
                 height = max(400, len(avg_loc) * 30 + 100)
                 fig_ranked = px.bar(
                     avg_loc,
@@ -126,6 +127,6 @@ if check_password():
 
     st.markdown(
         "<hr style='margin-top: 20px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Final Polished Dashboard • IHME GBD 2021</div>",
+        "<div style='text-align: center;'>✅ Final Top 12 Ranking Dashboard • IHME GBD 2021</div>",
         unsafe_allow_html=True
     )
