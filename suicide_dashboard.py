@@ -88,7 +88,7 @@ if check_password():
         st.markdown('<p class="column-title">Distribution & Boxplot</p>', unsafe_allow_html=True)
 
     # ✅ Main layout: left filters, right plots
-    col_left, col_right = st.columns([0.8, 3.2])
+    col_left, col_right = st.columns([0.7, 3.3])  # slightly narrower left panel
 
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
@@ -160,7 +160,7 @@ if check_password():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # ✅ Right: new compact multi-plots
+    # ✅ Right: compact multi-plots
     with col_right:
         # ✅ Row 1: Bar & Map
         row1_col1, row1_col2 = st.columns(2)
@@ -180,7 +180,7 @@ if check_password():
                         labels={"val": "Mean Age", "location_name": "Location"},
                     )
                     fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
-                    fig_ranked.update_layout(height=300, margin=dict(l=10, r=10, t=10, b=10))
+                    fig_ranked.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
                     st.plotly_chart(fig_ranked, use_container_width=True)
                 else:
                     st.warning("No data for bar chart.")
@@ -200,7 +200,7 @@ if check_password():
                     color="Mean Age", color_continuous_scale="Viridis",
                     labels={"Mean Age": "Mean Age"},
                 )
-                fig_map.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=10))
+                fig_map.update_layout(height=250, margin=dict(l=0, r=0, t=5, b=5))
                 st.plotly_chart(fig_map, use_container_width=True)
             else:
                 st.warning("No data for map.")
@@ -215,7 +215,7 @@ if check_password():
                     nbins=20, color_discrete_sequence=["#636EFA"],
                     labels={"val": "Mean Age"}
                 )
-                fig_hist.update_layout(height=300, margin=dict(l=10, r=10, t=10, b=10))
+                fig_hist.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
                 st.plotly_chart(fig_hist, use_container_width=True)
             else:
                 st.warning("No data for histogram.")
@@ -229,7 +229,7 @@ if check_password():
                     labels={"sex_name": "Sex", "val": "Mean Age"},
                     color_discrete_sequence=px.colors.qualitative.Set1
                 )
-                fig_box.update_layout(height=300, margin=dict(l=10, r=10, t=10, b=10))
+                fig_box.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
                 st.plotly_chart(fig_box, use_container_width=True)
             else:
                 st.warning("No data for boxplot.")
