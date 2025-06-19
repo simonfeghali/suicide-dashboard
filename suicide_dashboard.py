@@ -27,7 +27,24 @@ def check_password():
 # ✅ 2️⃣ Run if password OK
 # -------------------------------
 if check_password():
+    # ✅ Full width + custom CSS for tight top alignment
     st.set_page_config(layout="wide")
+    st.markdown(
+        """
+        <style>
+            .block-container {
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+            h1 {
+                margin-top: 0rem;
+                margin-bottom: 1rem;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
     st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard (Compact)</h1>", unsafe_allow_html=True)
 
     @st.cache_data
@@ -38,7 +55,7 @@ if check_password():
     df = load_data()
 
     # -------------------------------
-    # ✅ Main layout: Left = Filters+Insights, Right = 2 charts side-by-side
+    # ✅ Main layout: Left = Filters+Insights stacked, Right = 2 charts side-by-side
     # -------------------------------
     col_left, col_right = st.columns([1, 3])
 
@@ -110,7 +127,7 @@ if check_password():
                 st.warning("No data to show location chart.")
 
     st.markdown(
-        "<hr style='margin-top: 30px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Compact Dashboard • IHME GBD 2021</div>",
+        "<hr style='margin-top: 20px; margin-bottom: 10px;'>"
+        "<div style='text-align: center;'>✅ Clean Compact Dashboard • IHME GBD 2021</div>",
         unsafe_allow_html=True
     )
