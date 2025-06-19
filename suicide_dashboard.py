@@ -42,7 +42,6 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    # ⭐️ THE TITLE HAS BEEN UPDATED AS REQUESTED ⭐️
     st.markdown("<h1 style='text-align: center;'>Exploring the Mean Age of Suicide Mortality</h1>", unsafe_allow_html=True)
 
     @st.cache_data
@@ -73,23 +72,10 @@ if check_password():
         show_global_top = st.checkbox("Show top 12 locations globally", help="Ignores the 'Location(s)' filter to find the top 12 across all data.")
 
         selected_locations = st.multiselect(
-            "Location(s)",
-            all_locations,
-            default=["Global"],
-            disabled=show_global_top
+            "Location(s)", all_locations, default=["Global"], disabled=show_global_top
         )
-        
-        selected_sexes = st.multiselect(
-            "Sex(es)",
-            all_sexes,
-            default=["Both"]
-        )
-        
-        selected_years = st.multiselect(
-            "Year(s)",
-            all_years,
-            default=[max(all_years)]
-        )
+        selected_sexes = st.multiselect("Sex(es)", all_sexes, default=["Both"])
+        selected_years = st.multiselect("Year(s)", all_years, default=[max(all_years)])
         
         if show_global_top:
             filtered_df = df[df['sex_name'].isin(selected_sexes) & df['year_id'].isin(selected_years)]
@@ -167,7 +153,15 @@ if check_password():
                     color_continuous_scale="Viridis",
                     labels={"Mean Age": "Mean Age"},
                 )
-                fig_map.update_layout(height=500, margin=dict(l=0, r=0, t=0, b=0), title_text=None)
+                # ⭐️ THIS IS THE CHANGE FOR THE PROFESSIONAL MAP BACKGROUND ⭐️
+                fig_map.update_layout(
+                    mapbox_style="carto-positron", # Adds the professional background
+                    mapbox_zoom=0.5, # Optional: Adjust zoom level
+                    mapbox_center={"lat": 30, "lon": 0}, # Optional: Center the map
+                    height=500,
+                    margin=dict(l=0, r=0, t=0, b=0),
+                    title_text=None
+                )
                 st.plotly_chart(fig_map, use_container_width=True)
             else:
                 st.warning("No data for map.")
