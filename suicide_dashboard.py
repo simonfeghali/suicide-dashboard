@@ -46,7 +46,7 @@ if check_password():
 
     df = load_data()
 
-    # Layout: Left filters & insights | Right: 2 plots + map
+    # Layout: Left = Filters + Insights | Right = Top 12 bar + Map
     col_left, col_right = st.columns([1, 3])
 
     with col_left:
@@ -70,36 +70,28 @@ if check_password():
         ]
 
         st.subheader("📌 Insights")
-        st.markdown(f"<div class='small-metric'>Mean Age: <b>{filtered_df['val'].mean():.2f} years</b></div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='small-metric'>Age Range: <b>{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}</b></div>", unsafe_allow_html=True)
+        mean_age = filtered_df['val'].mean()
+        min_age = filtered_df['val'].min()
+        max_age = filtered_df['val'].max()
+
+        st.markdown(f"<div class='small-metric'>Overall Mean Age: <b>{mean_age:.2f} years</b></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='small-metric'>Age Range: <b>{min_age:.2f} - {max_age:.2f}</b></div>", unsafe_allow_html=True)
+
+        if not filtered_df.empty:
+            st.markdown("<b>Mean Age by Sex:</b>", unsafe_allow_html=True)
+            sex_stats = filtered_df.groupby("sex_name")["val"].mean().reset_index()
+            for _, row in sex_stats.iterrows():
+                st.markdown(f"<div class='small-metric'>{row['sex_name']}: <b>{row['val']:.2f} years</b></div>", unsafe_allow_html=True)
+        else:
+            st.warning("No data to show Mean Age by Sex.")
 
     with col_right:
-        st.subheader("📊 Insights & Map")
+        st.subheader("📊 Top 12 Ranked + Map")
 
         chart_col1, chart_col2 = st.columns(2)
 
-        # ✅ 1️⃣ Basic Mean Age by Sex
+        # ✅ 1️⃣ Ranked Horizontal Bar: Top 12 Locations
         with chart_col1:
-            st.write("**Mean Age by Sex**")
-            if not filtered_df.empty:
-                avg_by_sex = (
-                    filtered_df.groupby("sex_name")["val"]
-                    .mean().reset_index()
-                )
-                fig_sex = px.bar(
-                    avg_by_sex,
-                    x="sex_name",
-                    y="val",
-                    color="sex_name",
-                    labels={"val": "Mean Age", "sex_name": "Sex"},
-                )
-                fig_sex.update_layout(height=400, margin=dict(l=10, r=10, t=30, b=10))
-                st.plotly_chart(fig_sex, use_container_width=True)
-            else:
-                st.warning("No data for sex chart.")
-
-        # ✅ 2️⃣ Ranked Horizontal Bar — Top 12 Locations
-        with chart_col2:
             st.write("**Top 12 Ranked Mean Age by Location**")
             if not filtered_df.empty:
                 avg_loc = (
@@ -124,30 +116,31 @@ if check_password():
             else:
                 st.warning("No data for ranking chart.")
 
-        # ✅ 3️⃣ Choropleth Map
-        st.write("**🌍 Mean Age by Location (Map)**")
-        if not filtered_df.empty:
-            avg_map = (
-                filtered_df.groupby("location_name")["val"]
-                .mean().reset_index()
-                .rename(columns={"location_name": "Country", "val": "Mean Age"})
-            )
-            fig_map = px.choropleth(
-                avg_map,
-                locations="Country",
-                locationmode="country names",
-                color="Mean Age",
-                color_continuous_scale="Viridis",
-                title="Mean Age by Country",
-                labels={"Mean Age": "Mean Age"},
-            )
-            fig_map.update_layout(height=500, margin=dict(l=0, r=0, t=30, b=0))
-            st.plotly_chart(fig_map, use_container_width=True)
-        else:
-            st.warning("No data for map.")
+        # ✅ 2️⃣ Choropleth Map
+        with chart_col2:
+            st.write("**🌍 Mean Age by Location (Map)**")
+            if not filtered_df.empty:
+                avg_map = (
+                    filtered_df.groupby("location_name")["val"]
+                    .mean().reset_index()
+                    .rename(columns={"location_name": "Country", "val": "Mean Age"})
+                )
+                fig_map = px.choropleth(
+                    avg_map,
+                    locations="Country",
+                    locationmode="country names",
+                    color="Mean Age",
+                    color_continuous_scale="Viridis",
+                    title="",
+                    labels={"Mean Age": "Mean Age"},
+                )
+                fig_map.update_layout(height=500, margin=dict(l=0, r=0, t=30, b=0))
+                st.plotly_chart(fig_map, use_container_width=True)
+            else:
+                st.warning("No data for map.")
 
     st.markdown(
         "<hr style='margin-top: 20px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Final with Map • IHME GBD 2021</div>",
+        "<div style='text-align: center;'>✅ Final Polished Dashboard with Map • IHME GBD 2021</div>",
         unsafe_allow_html=True
     )
