@@ -71,9 +71,15 @@ if check_password():
         
         show_global_top = st.checkbox("Show top 12 locations globally", help="Ignores the 'Location(s)' filter to find the top 12 across all data.")
 
+        # ⭐️ THE FIX IS HERE: Set 'default' to 'all_locations' to make the 'X' button appear.
         selected_locations = st.multiselect(
-            "Location(s)", all_locations, default=["Global"], disabled=show_global_top
+            "Location(s)",
+            all_locations,
+            default=all_locations, # Changed from ["Global"]
+            disabled=show_global_top
         )
+        
+        # These were already correct, so they will continue to show the 'X' button.
         selected_sexes = st.multiselect("Sex(es)", all_sexes, default=all_sexes)
         selected_years = st.multiselect("Year(s)", all_years, default=all_years)
         
@@ -113,7 +119,6 @@ if check_password():
     with col_right:
         chart_col1, chart_col2 = st.columns(2)
 
-        # ⭐️ CHANGE: Removed the color unification logic. Each chart now has its own color scale.
         with chart_col1:
             if not filtered_df.empty:
                 avg_loc = (
@@ -127,7 +132,7 @@ if check_password():
                     fig_ranked = px.bar(
                         avg_loc, x="val", y="location_name", orientation="h",
                         color="val",
-                        color_continuous_scale="Viridis", # Use Viridis palette
+                        color_continuous_scale="Viridis",
                         labels={"val": "Mean Age", "location_name": "Location"},
                     )
                     fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
@@ -151,7 +156,7 @@ if check_password():
                 fig_map = px.choropleth(
                     avg_map, locations="Country", locationmode="country names",
                     color="Mean Age",
-                    color_continuous_scale="Viridis", # Use Viridis palette
+                    color_continuous_scale="Viridis",
                     labels={"Mean Age": "Mean Age"},
                 )
                 fig_map.update_layout(height=500, margin=dict(l=0, r=0, t=0, b=0), title_text=None)
