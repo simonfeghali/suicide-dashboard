@@ -72,14 +72,12 @@ if check_password():
         selected_sexes = st.multiselect("Sex(es)", all_sexes, default=all_sexes)
         selected_years = st.multiselect("Year(s)", all_years, default=all_years)
         
-        # ⭐️ CHANGE 1: Add the checkbox with the new logic
-        st.subheader("⚙️ Global View")
+        # Checkbox without the header
         show_global_top = st.checkbox("Show top 12 locations globally", help="Ignores the 'Location(s)' filter to find the top 12 across all data.")
 
-        # ⭐️ CHANGE 2: Conditionally filter the DataFrame
+        # Conditionally filter the DataFrame
         if show_global_top:
             # If checkbox is ticked, ignore the location filter
-            st.info("Showing global data. Location filter is ignored.")
             filtered_df = df[
                 df['sex_name'].isin(selected_sexes) &
                 df['year_id'].isin(selected_years)
@@ -94,7 +92,6 @@ if check_password():
 
         st.subheader("📌 Insights")
         if not filtered_df.empty:
-            # ... (insights section remains the same) ...
             mean_age = filtered_df['val'].mean()
             min_age = filtered_df['val'].min()
             max_age = filtered_df['val'].max()
@@ -110,29 +107,26 @@ if check_password():
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col_right:
-        st.subheader("📊 Top 12 Ranked + Map")
+        # Header for the right column removed
         chart_col1, chart_col2 = st.columns(2)
 
         with chart_col1:
             st.write("**Top 12 Ranked Mean Age by Location**")
             if not filtered_df.empty:
-                # ⭐️ CHANGE 3: Sort by HIGHEST age (descending) and always take top 12
                 avg_loc = (
                     filtered_df.groupby("location_name")["val"]
                     .mean().reset_index()
-                    .sort_values("val", ascending=False) # Use False for highest values
+                    .sort_values("val", ascending=False)
                     .head(12)
                 )
 
                 if not avg_loc.empty:
                     height = max(400, len(avg_loc) * 25 + 100)
-                    # For a ranked chart, it's better to show highest at the top
                     fig_ranked = px.bar(
                         avg_loc, x="val", y="location_name", orientation="h",
                         color="val", color_continuous_scale=px.colors.sequential.Plasma_r,
                         labels={"val": "Mean Age", "location_name": "Location"},
                     )
-                    # This sorts the y-axis to match the data order (highest on top)
                     fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
                     fig_ranked.update_layout(height=height, margin=dict(l=10, r=10, t=30, b=10))
                     st.plotly_chart(fig_ranked, use_container_width=True)
@@ -144,7 +138,6 @@ if check_password():
         with chart_col2:
             st.write("**🌍 Mean Age by Location (Map)**")
             if not filtered_df.empty:
-                # This chart logic doesn't need to change, it will use the correct `filtered_df`
                 avg_map = (
                     filtered_df.groupby("location_name")["val"]
                     .mean().reset_index()
