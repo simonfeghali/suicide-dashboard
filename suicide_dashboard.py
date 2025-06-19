@@ -29,30 +29,14 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ⭐️ CHANGE 1: UPDATED CSS FOR SMALLER TEXT AND TIGHTER SPACING ⭐️
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
             h1 { margin-top: 0; margin-bottom: 1rem; }
             h3 { font-size: 18px !important; margin-bottom: 0.5rem !important; }
-
-            /* Tighter spacing for insight text */
-            .small-metric {
-                font-size: 15px !important;
-                margin-bottom: 2px !important; /* Reduces space between lines */
-                line-height: 1.2;
-            }
-
-            /* Single-line multiselect styles */
-            div[data-baseweb="select"] > div:first-child {
-                flex-wrap: nowrap !important;
-                overflow-x: auto !important;
-            }
-            div[data-baseweb="select"] {
-                max-height: 50px;
-                overflow-y: hidden;
-                font-size: 14px !important;
-            }
+            .small-metric { font-size: 15px !important; margin-bottom: 2px !important; line-height: 1.2; }
+            div[data-baseweb="select"] > div:first-child { flex-wrap: nowrap !important; overflow-x: auto !important; }
+            div[data-baseweb="select"] { max-height: 50px; overflow-y: hidden; font-size: 14px !important; }
             label { font-size: 14px !important; }
             .left-column { max-width: 250px; padding-right: 10px; }
         </style>
@@ -70,22 +54,27 @@ if check_password():
 
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
-        
-        # Title without emoji
         st.subheader("Controls & Insights")
 
-        # --- Filter Widgets ---
         all_locations = sorted(df['location_name'].unique())
         all_sexes = sorted(df['sex_name'].unique())
         all_years = sorted(df['year_id'].unique())
         
-        selected_locations = st.multiselect("Location(s)", all_locations, default=["Global"])
+        # We need to get the state of the checkbox first
+        show_global_top = st.checkbox("Show top 12 locations globally", help="Ignores the 'Location(s)' filter to find the top 12 across all data.")
+
+        # ⭐️ CHANGE: The 'disabled' parameter is now linked to the checkbox's state. ⭐️
+        selected_locations = st.multiselect(
+            "Location(s)",
+            all_locations,
+            default=["Global"],
+            disabled=show_global_top # This will disable the widget if the box is checked
+        )
+
+        # The other filters remain active
         selected_sexes = st.multiselect("Sex(es)", all_sexes, default=all_sexes)
         selected_years = st.multiselect("Year(s)", all_years, default=all_years)
         
-        show_global_top = st.checkbox("Show top 12 locations globally", help="Ignores the 'Location(s)' filter to find the top 12 across all data.")
-
-        # --- Data Filtering Logic ---
         if show_global_top:
             filtered_df = df[
                 df['sex_name'].isin(selected_sexes) &
@@ -98,18 +87,14 @@ if check_password():
                 df['year_id'].isin(selected_years)
             ]
 
-        # ⭐️ CHANGE 2: REDUCED MARGIN ON THE SEPARATOR LINE ⭐️
         st.markdown("<hr style='margin: 0.75rem 0'>", unsafe_allow_html=True)
 
-        # --- Insights Display ---
         if not filtered_df.empty:
             mean_age = filtered_df['val'].mean()
             min_age = filtered_df['val'].min()
             max_age = filtered_df['val'].max()
             st.markdown(f"<div class='small-metric'>Overall Mean Age: <b>{mean_age:.2f} years</b></div>", unsafe_allow_html=True)
             st.markdown(f"<div class='small-metric'>Age Range: <b>{min_age:.2f} - {max_age:.2f}</b></div>", unsafe_allow_html=True)
-            
-            # This section will now appear tighter due to the CSS changes
             st.markdown("<b>Mean Age by Sex:</b>", unsafe_allow_html=True)
             sex_stats = filtered_df.groupby("sex_name")["val"].mean().reset_index()
             for _, row in sex_stats.iterrows():
@@ -131,7 +116,6 @@ if check_password():
                     .sort_values("val", ascending=False)
                     .head(12)
                 )
-
                 if not avg_loc.empty:
                     height = max(400, len(avg_loc) * 25 + 100)
                     fig_ranked = px.bar(
@@ -148,7 +132,6 @@ if check_password():
                 st.warning("No data for ranking chart.")
 
         with chart_col2:
-            # Title without emoji
             st.write("**Mean Age by Location (Map)**")
             if not filtered_df.empty:
                 avg_map = (
