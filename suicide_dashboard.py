@@ -27,7 +27,7 @@ def check_password():
 # ✅ 2️⃣ Run if password OK
 # -------------------------------
 if check_password():
-    st.title("📊 Suicide Mean Age Dashboard (Three Columns with Spacing)")
+    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard</h1>", unsafe_allow_html=True)
 
     @st.cache_data
     def load_data():
@@ -37,14 +37,12 @@ if check_password():
     df = load_data()
 
     # -------------------------------
-    # ✅ 3️⃣ Three side-by-side columns WITH spacing columns
-    # Layout: [Filter] [space] [Insights] [space] [Chart]
-    # Wider chart column for balance
+    # ✅ 3️⃣ 100% wide layout: [Filters] [big gap] [Insights] [big gap] [Chart]
     # -------------------------------
-    col1, spacer1, col2, spacer2, col3 = st.columns([1, 0.1, 1, 0.1, 2])
+    col1, spacer1, col2, spacer2, col3 = st.columns([1, 0.5, 1, 0.5, 3])
 
     # -------------------------------
-    # ✅ Column 1: Filters (stacked vertically)
+    # ✅ Column 1: Filters
     # -------------------------------
     with col1:
         st.header("🎛️ Filters")
@@ -68,7 +66,7 @@ if check_password():
     ]
 
     # -------------------------------
-    # ✅ Column 2: Insights (stacked vertically)
+    # ✅ Column 2: Insights
     # -------------------------------
     with col2:
         st.header("📌 Insights")
@@ -76,7 +74,7 @@ if check_password():
         st.metric("Age Range", f"{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}")
 
     # -------------------------------
-    # ✅ Column 3: Chart (+ optional data table)
+    # ✅ Column 3: Chart (+ Table)
     # -------------------------------
     with col3:
         st.header("📈 Chart")
@@ -90,7 +88,7 @@ if check_password():
                 labels={"year_id": "Year", "val": "Mean Age"},
             )
             fig.update_layout(
-                height=450, margin=dict(l=10, r=10, t=30, b=10),
+                height=500, margin=dict(l=20, r=20, t=30, b=20),
                 legend_title=None
             )
             st.plotly_chart(fig, use_container_width=True)
@@ -100,4 +98,8 @@ if check_password():
         with st.expander("Show Filtered Data Table"):
             st.dataframe(filtered_df, height=200)
 
-    st.caption("✅ Clean three-columns layout with spacing • IHME GBD 2021")
+    st.markdown(
+        "<hr style='margin-top: 30px; margin-bottom: 10px;'>"
+        "<div style='text-align: center;'>✅ Clean Full-Screen Dashboard • IHME GBD 2021</div>",
+        unsafe_allow_html=True
+    )
