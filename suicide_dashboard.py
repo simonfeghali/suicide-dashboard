@@ -36,7 +36,7 @@ if check_password():
     # --- PAGE CONFIG AND CSS ---
     st.set_page_config(layout="wide")
 
-    # This CSS block has the new, more forceful rules
+    # This CSS block now includes the strict single-line rule
     st.markdown("""
         <style>
             .block-container {
@@ -46,22 +46,12 @@ if check_password():
                 padding-right: 5rem;
             }
 
-            /* --- NEW, MORE FORCEFUL CSS FOR SINGLE-LINE MULTISELECT --- */
-
-            /* This targets the container holding the multiselect pills */
-            div[data-baseweb="select"] > div {
-                /* Stop the pills from wrapping to the next line */
+            /* --- NEW CSS FOR STRICTLY SINGLE-LINE MULTISELECT --- */
+            div[data-testid="stMultiSelect"] > div > div {
+                /* Prevent the selected items from wrapping to the next line */
                 flex-wrap: nowrap;
-                /* Add a horizontal scrollbar if they overflow */
+                /* Add a horizontal scrollbar if the items overflow */
                 overflow-x: auto;
-            }
-
-            /* This targets the entire multiselect widget */
-            div[data-testid="stMultiSelect"] {
-                /* Set a max height to force it to be a single line */
-                max-height: 3rem; /* 48px */
-                /* Hide any vertical overflow */
-                overflow-y: hidden;
             }
             /* --- END OF NEW CSS --- */
         </style>
