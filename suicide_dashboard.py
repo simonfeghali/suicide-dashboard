@@ -36,27 +36,17 @@ if check_password():
             h1 { margin-top: 0; margin-bottom: 1rem; }
             .small-metric { font-size: 16px !important; }
 
-            /* Target the container that holds all the selected "chips" */
             div[data-baseweb="select"] > div:first-child {
                 flex-wrap: nowrap !important;
                 overflow-x: auto !important;
             }
-
-            /* Force the multiselect widget itself to a fixed, single-line height */
             div[data-baseweb="select"] {
                 max-height: 50px;
                 overflow-y: hidden;
                 font-size: 14px !important;
             }
-
-            label {
-                font-size: 14px !important;
-            }
-
-            .left-column {
-                max-width: 250px;
-                padding-right: 10px;
-            }
+            label { font-size: 14px !important; }
+            .left-column { max-width: 250px; padding-right: 10px; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -68,52 +58,51 @@ if check_password():
 
     df = load_data()
 
-    # ✅ Narrower left column
     col_left, col_right = st.columns([0.8, 3.2])
 
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
-
         st.subheader("🎛️ Filters")
 
-        # ⭐️ CHANGE 1: UPDATED DEFAULTS FOR "CLEAR ALL" (X) BUTTON ⭐️
         all_locations = sorted(df['location_name'].unique())
         all_sexes = sorted(df['sex_name'].unique())
         all_years = sorted(df['year_id'].unique())
+        
+        # ⭐️ CHANGE 1: Use st.session_state to manage the location filter's state
+        # This is necessary so the checkbox can modify it.
+        if 'location_filter' not in st.session_state:
+            st.session_state.location_filter = all_locations
 
         selected_locations = st.multiselect(
-            "Location(s)", all_locations, default=all_locations
+            "Location(s)", all_locations,
+            key='location_filter' # Use the key to link the widget to session_state
         )
 
-        selected_sexes = st.multiselect(
-            "Sex(es)", all_sexes, default=all_sexes
-        )
+        selected_sexes = st.multiselect("Sex(es)", all_sexes, default=all_sexes)
+        selected_years = st.multiselect("Year(s)", all_years, default=all_years)
 
-        selected_years = st.multiselect(
-            "Year(s)", all_years, default=all_years
-        )
+        # ⭐️ CHANGE 2: The checkbox is now a button to clear the location filter
+        # It no longer has a title above it.
+        if st.checkbox("Clear Location Selections"):
+            # When checked, set the location filter to an empty list
+            st.session_state.location_filter = []
+            # Rerun the script immediately to reflect the change
+            st.rerun()
 
-        # ✅ Apply filters
+        # Apply filters
         filtered_df = df[
             df['location_name'].isin(selected_locations) &
             df['sex_name'].isin(selected_sexes) &
             df['year_id'].isin(selected_years)
         ]
 
-        # ⭐️ CHANGE 2: "SHOW ALL" CHECKBOX IS NOW CORRECTLY ADDED HERE ⭐️
-        st.subheader("⚙️ View Options")
-        show_all = st.checkbox("Show all locations in ranked chart", value=False)
-        st.info("The map always shows all filtered locations.")
-
         st.subheader("📌 Insights")
         if not filtered_df.empty:
             mean_age = filtered_df['val'].mean()
             min_age = filtered_df['val'].min()
             max_age = filtered_df['val'].max()
-
             st.markdown(f"<div class='small-metric'>Overall Mean Age: <b>{mean_age:.2f} years</b></div>", unsafe_allow_html=True)
             st.markdown(f"<div class='small-metric'>Age Range: <b>{min_age:.2f} - {max_age:.2f}</b></div>", unsafe_allow_html=True)
-
             st.markdown("<b>Mean Age by Sex:</b>", unsafe_allow_html=True)
             sex_stats = filtered_df.groupby("sex_name")["val"].mean().reset_index()
             for _, row in sex_stats.iterrows():
@@ -124,20 +113,13 @@ if check_password():
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col_right:
-        st.subheader("📊 Ranked Data + Map")
-
+        st.subheader("📊 Top 12 Ranked + Map")
         chart_col1, chart_col2 = st.columns(2)
 
-        # ✅ 1️⃣ Ranked Horizontal Bar: Top 12 Locations or All
+        # ✅ 1️⃣ Ranked Horizontal Bar: Top 12 Locations
         with chart_col1:
-            # ⭐️ CHANGE 3: LOGIC USES THE "show_all" CHECKBOX ⭐️
-            ranked_chart_title = (
-                "**Top 12 Ranked Mean Age by Location**"
-                if not show_all
-                else "**Ranked Mean Age by Location (All)**"
-            )
-            st.write(ranked_chart_title)
-            
+            # ⭐️ CHANGE 3: The title is now static and logic always takes the top 12.
+            st.write("**Top 12 Ranked Mean Age by Location**")
             if not filtered_df.empty:
                 avg_loc_all = (
                     filtered_df.groupby("location_name")["val"]
@@ -145,7 +127,8 @@ if check_password():
                     .sort_values("val", ascending=True)
                 )
 
-                data_to_display = avg_loc_all if show_all else avg_loc_all.head(12)
+                # The chart data is ALWAYS the top 12 from the filtered data.
+                data_to_display = avg_loc_all.head(12)
 
                 if not data_to_display.empty:
                     height = max(400, len(data_to_display) * 25 + 100)
