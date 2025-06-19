@@ -38,7 +38,7 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Final with Map</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Final Compact Filters</h1>", unsafe_allow_html=True)
 
     @st.cache_data
     def load_data():
@@ -50,16 +50,24 @@ if check_password():
     col_left, col_right = st.columns([1, 3])
 
     with col_left:
-        st.subheader("🎛️ Filters")
-        selected_locations = st.multiselect(
-            "Location(s)", sorted(df['location_name'].unique()), default=["Global"]
-        )
-        selected_sexes = st.multiselect(
-            "Sex(es)", sorted(df['sex_name'].unique()), default=sorted(df['sex_name'].unique())
-        )
-        with st.expander("Select Year(s)"):
+        st.subheader("🎛️ Filters (One Row)")
+
+        # ✅ Filters in one row using columns:
+        fcol1, fcol2, fcol3 = st.columns(3)
+
+        with fcol1:
+            selected_locations = st.multiselect(
+                "Location(s)", sorted(df['location_name'].unique()), default=["Global"]
+            )
+
+        with fcol2:
+            selected_sexes = st.multiselect(
+                "Sex(es)", sorted(df['sex_name'].unique()), default=sorted(df['sex_name'].unique())
+            )
+
+        with fcol3:
             selected_years = st.multiselect(
-                "", sorted(df['year_id'].unique()), default=sorted(df['year_id'].unique())
+                "Year(s)", sorted(df['year_id'].unique()), default=sorted(df['year_id'].unique())
             )
 
         # Apply filters
@@ -141,6 +149,6 @@ if check_password():
 
     st.markdown(
         "<hr style='margin-top: 20px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Final Polished Dashboard with Map • IHME GBD 2021</div>",
+        "<div style='text-align: center;'>✅ Final Compact Filters Dashboard • IHME GBD 2021</div>",
         unsafe_allow_html=True
     )
