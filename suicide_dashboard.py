@@ -29,23 +29,14 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ⭐️ CHANGE 1: ADDED 'align-items' TO FIX THE ICON POSITION ⭐️
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
             h1 { margin-top: 0; margin-bottom: 1rem; }
             .small-metric { font-size: 15px !important; line-height: 1.2; }
             .column-title { font-size: 16px !important; font-weight: bold; text-align: center; margin-bottom: 0px; }
-
-            /* Single-line multiselect styles */
             div[data-baseweb="select"] > div:first-child { flex-wrap: nowrap !important; overflow-x: auto !important; }
-
-            div[data-baseweb="select"] {
-                max-height: 50px;
-                overflow-y: hidden;
-                font-size: 14px !important;
-                align-items: flex-start !important; /* This forces icons to the top */
-            }
+            div[data-baseweb="select"] { max-height: 50px; overflow-y: hidden; font-size: 14px !important; align-items: flex-start !important; }
             label { font-size: 14px !important; }
             .left-column { max-width: 250px; padding-right: 10px; }
         </style>
@@ -78,35 +69,42 @@ if check_password():
         all_sexes = sorted(df['sex_name'].unique())
         all_years = sorted(df['year_id'].unique())
         
-        show_global_top = st.checkbox("Show top 12 locations globally", help="Ignores the 'Location(s)' filter to find the top 12 across all data.")
+        # ⭐️ CHANGE 1: ADD THE RESET BUTTON AND ITS LOGIC
+        if st.button("Reset All Filters"):
+            st.session_state.global_view_checkbox = False
+            st.session_state.locations_filter = all_locations
+            st.session_state.sexes_filter = all_sexes
+            st.session_state.years_filter = all_years
+            st.rerun()
 
-        # ⭐️ CHANGE 2: RESTORED DEFAULTS TO MAKE THE 'X' BUTTONS APPEAR
-        selected_locations = st.multiselect(
-            "Location(s)",
-            all_locations,
+        # ⭐️ CHANGE 2: BIND ALL WIDGETS TO SESSION STATE USING 'key'
+        st.checkbox(
+            "Show top 12 locations globally",
+            key="global_view_checkbox",
+            help="Ignores the 'Location(s)' filter to find the top 12 across all data."
+        )
+
+        st.multiselect(
+            "Location(s)", all_locations,
+            key="locations_filter",
             default=all_locations,
-            disabled=show_global_top
+            disabled=st.session_state.get("global_view_checkbox", False)
         )
         
-        selected_sexes = st.multiselect(
-            "Sex(es)",
-            all_sexes,
-            default=all_sexes
-        )
+        st.multiselect("Sex(es)", all_sexes, key="sexes_filter", default=all_sexes)
+        st.multiselect("Year(s)", all_years, key="years_filter", default=all_years)
         
-        selected_years = st.multiselect(
-            "Year(s)",
-            all_years,
-            default=all_years
-        )
-        
-        if show_global_top:
-            filtered_df = df[df['sex_name'].isin(selected_sexes) & df['year_id'].isin(selected_years)]
+        # ⭐️ CHANGE 3: USE THE VALUES FROM SESSION STATE FOR FILTERING
+        if st.session_state.get("global_view_checkbox", False):
+            filtered_df = df[
+                df['sex_name'].isin(st.session_state.get("sexes_filter", all_sexes)) &
+                df['year_id'].isin(st.session_state.get("years_filter", all_years))
+            ]
         else:
             filtered_df = df[
-                df['location_name'].isin(selected_locations) &
-                df['sex_name'].isin(selected_sexes) &
-                df['year_id'].isin(selected_years)
+                df['location_name'].isin(st.session_state.get("locations_filter", all_locations)) &
+                df['sex_name'].isin(st.session_state.get("sexes_filter", all_sexes)) &
+                df['year_id'].isin(st.session_state.get("years_filter", all_years))
             ]
 
         st.markdown("<hr style='margin: 0.75rem 0'>", unsafe_allow_html=True)
