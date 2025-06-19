@@ -69,42 +69,47 @@ if check_password():
         all_sexes = sorted(df['sex_name'].unique())
         all_years = sorted(df['year_id'].unique())
         
-        # ⭐️ CHANGE 1: ADD THE RESET BUTTON AND ITS LOGIC
+        # ⭐️ CHANGE 1: Initialize session state for all filters if they don't exist
+        if "global_view_checkbox" not in st.session_state:
+            st.session_state.global_view_checkbox = False
+            st.session_state.locations_filter = [] # Start with empty locations
+            st.session_state.sexes_filter = all_sexes
+            st.session_state.years_filter = all_years
+        
+        # Reset button logic
         if st.button("Reset All Filters"):
             st.session_state.global_view_checkbox = False
-            st.session_state.locations_filter = all_locations
+            st.session_state.locations_filter = [] # ⭐️ CHANGE 2: Reset locations to empty
             st.session_state.sexes_filter = all_sexes
             st.session_state.years_filter = all_years
             st.rerun()
 
-        # ⭐️ CHANGE 2: BIND ALL WIDGETS TO SESSION STATE USING 'key'
         st.checkbox(
             "Show top 12 locations globally",
             key="global_view_checkbox",
             help="Ignores the 'Location(s)' filter to find the top 12 across all data."
         )
-
+        
+        # ⭐️ CHANGE 3: Widgets now use the keys initialized above. No 'default' needed.
         st.multiselect(
             "Location(s)", all_locations,
             key="locations_filter",
-            default=all_locations,
-            disabled=st.session_state.get("global_view_checkbox", False)
+            disabled=st.session_state.global_view_checkbox
         )
         
-        st.multiselect("Sex(es)", all_sexes, key="sexes_filter", default=all_sexes)
-        st.multiselect("Year(s)", all_years, key="years_filter", default=all_years)
+        st.multiselect("Sex(es)", all_sexes, key="sexes_filter")
+        st.multiselect("Year(s)", all_years, key="years_filter")
         
-        # ⭐️ CHANGE 3: USE THE VALUES FROM SESSION STATE FOR FILTERING
-        if st.session_state.get("global_view_checkbox", False):
+        if st.session_state.global_view_checkbox:
             filtered_df = df[
-                df['sex_name'].isin(st.session_state.get("sexes_filter", all_sexes)) &
-                df['year_id'].isin(st.session_state.get("years_filter", all_years))
+                df['sex_name'].isin(st.session_state.sexes_filter) &
+                df['year_id'].isin(st.session_state.years_filter)
             ]
         else:
             filtered_df = df[
-                df['location_name'].isin(st.session_state.get("locations_filter", all_locations)) &
-                df['sex_name'].isin(st.session_state.get("sexes_filter", all_sexes)) &
-                df['year_id'].isin(st.session_state.get("years_filter", all_years))
+                df['location_name'].isin(st.session_state.locations_filter) &
+                df['sex_name'].isin(st.session_state.sexes_filter) &
+                df['year_id'].isin(st.session_state.years_filter)
             ]
 
         st.markdown("<hr style='margin: 0.75rem 0'>", unsafe_allow_html=True)
@@ -127,7 +132,7 @@ if check_password():
             full_insights_html = f"<div class='small-metric'>{'<br>'.join(insights_html)}</div>"
             st.markdown(full_insights_html, unsafe_allow_html=True)
         else:
-            st.warning("No data to show for selected filters.")
+            st.warning("Please select at least one location to see data.")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -157,9 +162,9 @@ if check_password():
                     )
                     st.plotly_chart(fig_ranked, use_container_width=True)
                 else:
-                    st.warning("No data for ranking chart.")
+                    st.warning("No data for ranking chart. Please select a location.")
             else:
-                st.warning("No data for ranking chart.")
+                st.warning("No data for ranking chart. Please select a location.")
 
         with chart_col2:
             if not filtered_df.empty:
@@ -184,6 +189,6 @@ if check_password():
                 )
                 st.plotly_chart(fig_map, use_container_width=True)
             else:
-                st.warning("No data for map.")
+                st.warning("No data for map. Please select a location.")
 
     st.markdown("<hr><div style='text-align: center;'>Data Source: IHME GBD 2021</div>", unsafe_allow_html=True)
