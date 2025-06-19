@@ -35,19 +35,20 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Compact CSS for tight layout
+    # ✅ Updated CSS for tight filters & no top margin
     st.markdown("""
         <style>
             .block-container {
-                padding-top: 0.5rem;
+                padding-top: 0.1rem;
                 padding-bottom: 0.5rem;
                 padding-left: 1rem;
                 padding-right: 1rem;
             }
-            h2 { margin-top: 0; margin-bottom: 0.5rem; }
+            h2 { margin-top: 0; margin-bottom: 0.3rem; }
+            .column-title { font-size: 15px !important; font-weight: bold; text-align: center; margin-top: 0; margin-bottom: 0.2rem; }
             .small-metric { font-size: 14px !important; line-height: 1.1; }
-            .column-title { font-size: 15px !important; font-weight: bold; text-align: center; margin-bottom: 0.25rem; }
 
+            /* Compact tags scroll horizontally */
             div[data-baseweb="tag"] {
                 display: flex;
                 flex-wrap: nowrap !important;
@@ -61,6 +62,19 @@ if check_password():
                 min-height: 36px !important;
                 font-size: 13px !important;
                 align-items: flex-start !important;
+                margin: 0 0 0.3rem 0 !important;
+            }
+
+            /* Tighter Reset button */
+            div.stButton > button {
+                margin: 0 0 0.3rem 0;
+                padding: 0.35rem 0.9rem;
+                font-size: 13px;
+            }
+
+            /* Tighter checkbox */
+            div[data-testid="stCheckbox"] {
+                margin: 0 0 0.3rem 0;
             }
 
             label { font-size: 13px !important; }
@@ -70,7 +84,7 @@ if check_password():
 
     # ✅ Compact Title
     st.markdown("""
-        <div style='text-align: center; margin-bottom: 0.5rem;'>
+        <div style='text-align: center; margin-bottom: 0.3rem;'>
             <h2>Exploring the Mean Age of Suicide Mortality</h2>
             <p style='font-size: 14px; font-style: italic; margin: 0;'>Data Source: IHME GBD 2021</p>
         </div>
@@ -84,7 +98,7 @@ if check_password():
     df = load_data()
 
     # ✅ Aligned column titles
-    title_col1, title_col2, title_col3 = st.columns([0.8, 1.6, 1.6])
+    title_col1, title_col2, title_col3 = st.columns([0.7, 1.7, 1.7])
     with title_col1:
         st.markdown('<p class="column-title">Controls & Insights</p>', unsafe_allow_html=True)
     with title_col2:
@@ -92,7 +106,7 @@ if check_password():
     with title_col3:
         st.markdown('<p class="column-title">Distribution & Boxplot</p>', unsafe_allow_html=True)
 
-    # ✅ Main layout: filters & insights | visuals
+    # ✅ Main layout: filters/insights + visuals
     col_left, col_right = st.columns([0.7, 3.3])
 
     with col_left:
@@ -164,9 +178,8 @@ if check_password():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # ✅ Right: squeezed plots, 2 rows × 2 columns
+    # ✅ Right: compact plots
     with col_right:
-        # --- Row 1 ---
         row1_col1, row1_col2 = st.columns(2)
         with row1_col1:
             st.write("**Top 12 Ranked Mean Age by Location**")
@@ -206,7 +219,6 @@ if check_password():
             else:
                 st.warning("No data for map.")
 
-        # --- Row 2 ---
         row2_col1, row2_col2 = st.columns(2)
         with row2_col1:
             st.write("**Mean Age Distribution (Histogram)**")
