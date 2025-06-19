@@ -27,9 +27,8 @@ def check_password():
 # ✅ 2️⃣ Run if password OK
 # -------------------------------
 if check_password():
-    st.set_page_config(layout="wide")  # ✅ Full-width mode
-
-    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard</h1>", unsafe_allow_html=True)
+    st.set_page_config(layout="wide")
+    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard (Insightful)</h1>", unsafe_allow_html=True)
 
     @st.cache_data
     def load_data():
@@ -39,16 +38,15 @@ if check_password():
     df = load_data()
 
     # -------------------------------
-    # ✅ 3️⃣ Balanced Columns with realistic spacers
-    # Layout: [Filter] [small gap] [Insights] [small gap] [Chart]
+    # ✅ 3️⃣ Two main columns: Left = Filters+Insights, Right = 3 Charts stacked
     # -------------------------------
-    col1, spacer1, col2, spacer2, col3 = st.columns([1, 0.3, 1, 0.3, 3])
+    col_left, col_right = st.columns([1, 3])
 
     # -------------------------------
-    # ✅ Column 1: Filters
+    # ✅ Left: Filters & Insights stacked vertically
     # -------------------------------
-    with col1:
-        st.header("🎛️ Filters")
+    with col_left:
+        st.subheader("🎛️ Filters")
         selected_locations = st.multiselect(
             "Location(s)", sorted(df['location_name'].unique()), default=["Global"]
         )
@@ -59,50 +57,67 @@ if check_password():
             "Year(s)", sorted(df['year_id'].unique()), default=sorted(df['year_id'].unique())
         )
 
-    # -------------------------------
-    # ✅ Apply Filters
-    # -------------------------------
-    filtered_df = df[
-        df['location_name'].isin(selected_locations) &
-        df['sex_name'].isin(selected_sexes) &
-        df['year_id'].isin(selected_years)
-    ]
+        filtered_df = df[
+            df['location_name'].isin(selected_locations) &
+            df['sex_name'].isin(selected_sexes) &
+            df['year_id'].isin(selected_years)
+        ]
 
-    # -------------------------------
-    # ✅ Column 2: Insights
-    # -------------------------------
-    with col2:
-        st.header("📌 Insights")
+        st.subheader("📌 Insights")
         st.metric("Mean Age", f"{filtered_df['val'].mean():.2f} years")
         st.metric("Age Range", f"{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}")
 
     # -------------------------------
-    # ✅ Column 3: Chart (+ Table)
+    # ✅ Right: 3 insightful charts stacked vertically
     # -------------------------------
-    with col3:
-        st.header("📈 Chart")
+    with col_right:
+        st.subheader("📈 Trend Over Time")
         if not filtered_df.empty:
-            fig = px.line(
+            fig_trend = px.line(
                 filtered_df,
                 x="year_id",
                 y="val",
                 color="sex_name",
                 markers=True,
                 labels={"year_id": "Year", "val": "Mean Age"},
+                title="Mean Age of Death Over Time"
             )
-            fig.update_layout(
-                height=500, margin=dict(l=20, r=20, t=30, b=20),
-                legend_title=None
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig_trend, use_container_width=True)
         else:
             st.warning("No data for selected filters.")
 
-        with st.expander("Show Filtered Data Table"):
-            st.dataframe(filtered_df, height=200)
+        st.subheader("📊 Average Age by Sex")
+        if not filtered_df.empty:
+            avg_by_sex = filtered_df.groupby("sex_name")["val"].mean().reset_index()
+            fig_bar = px.bar(
+                avg_by_sex,
+                x="sex_name",
+                y="val",
+                color="sex_name",
+                labels={"val": "Mean Age", "sex_name": "Sex"},
+                title="Mean Age by Sex"
+            )
+            st.plotly_chart(fig_bar, use_container_width=True)
+        else:
+            st.warning("No data to show bar chart.")
+
+        st.subheader("🌍 Mean Age by Location")
+        if not filtered_df.empty:
+            avg_by_location = filtered_df.groupby("location_name")["val"].mean().reset_index()
+            fig_location = px.bar(
+                avg_by_location,
+                x="location_name",
+                y="val",
+                color="location_name",
+                labels={"val": "Mean Age", "location_name": "Location"},
+                title="Mean Age by Location"
+            )
+            st.plotly_chart(fig_location, use_container_width=True)
+        else:
+            st.warning("No data to show location chart.")
 
     st.markdown(
         "<hr style='margin-top: 30px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Clean Full-Width Dashboard • IHME GBD 2021</div>",
+        "<div style='text-align: center;'>✅ Advanced Insight Dashboard • IHME GBD 2021</div>",
         unsafe_allow_html=True
     )
