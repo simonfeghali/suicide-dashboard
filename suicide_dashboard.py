@@ -35,23 +35,17 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ CSS — compact multiselects, single line tags, and tidy styling
+    # ✅ Updated CSS — removed title, no margin, lifted up
     st.markdown("""
         <style>
             .block-container {
                 padding-top: 0rem !important;
             }
 
-            .column-title {
-                font-size: 16px !important;
-                font-weight: bold;
-                text-align: center;
-                margin-bottom: 0.2rem;
-            }
-
             .left-column {
                 max-width: 250px;
                 padding-right: 10px;
+                margin-top: 0 !important;  /* ensure no top margin */
             }
 
             /* Shrink multiselect input */
@@ -78,7 +72,6 @@ if check_password():
                 padding: 2px 4px !important;
             }
 
-            /* Smaller checkboxes & reset button */
             div[data-testid="stCheckbox"] {
                 margin: 0 0 0.2rem 0;
             }
@@ -95,13 +88,12 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    # ✅ MAIN 2 COLUMN LAYOUT
+    # ✅ MAIN 2 COLUMN LAYOUT:
     col_left, col_right = st.columns([0.7, 3.3])
 
-    # ✅ LEFT COLUMN — FLUSH TOP, COMPACT FILTERS
+    # ✅ LEFT COLUMN — NO HEADER, LIFTED UP
     with col_left:
-        st.markdown('<div class="left-column">', unsafe_allow_html=True)
-        st.markdown('<p class="column-title">Controls & Insights</p>', unsafe_allow_html=True)
+        st.markdown('<div class="left-column" style="margin-top: 0;">', unsafe_allow_html=True)
 
         @st.cache_data
         def load_data():
@@ -158,7 +150,6 @@ if check_password():
             min_age = filtered_df['val'].min()
             max_age = filtered_df['val'].max()
 
-            # ✅ FIXED: no extra <br>
             insights_html = [
                 f"Overall Mean Age: <b>{mean_age:.2f} years</b>",
                 f"Age Range: <b>{min_age:.2f} - {max_age:.2f}</b>",
