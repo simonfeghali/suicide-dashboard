@@ -35,13 +35,18 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Bulletproof single-row multiselect chips with scroll
+    # ✅ Compact CSS for tight layout
     st.markdown("""
         <style>
-            .block-container { padding-top: 1rem; }
-            h2 { margin-top: 0; }
-            .small-metric { font-size: 15px !important; line-height: 1.2; }
-            .column-title { font-size: 16px !important; font-weight: bold; text-align: center; margin-bottom: 0px; }
+            .block-container {
+                padding-top: 0.5rem;
+                padding-bottom: 0.5rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            h2 { margin-top: 0; margin-bottom: 0.5rem; }
+            .small-metric { font-size: 14px !important; line-height: 1.1; }
+            .column-title { font-size: 15px !important; font-weight: bold; text-align: center; margin-bottom: 0.25rem; }
 
             div[data-baseweb="tag"] {
                 display: flex;
@@ -49,25 +54,25 @@ if check_password():
                 overflow-x: auto !important;
                 overflow-y: hidden !important;
                 white-space: nowrap;
-                max-height: 40px;
+                max-height: 35px;
             }
 
             div[data-baseweb="select"] {
-                min-height: 40px !important;
-                font-size: 14px !important;
+                min-height: 36px !important;
+                font-size: 13px !important;
                 align-items: flex-start !important;
             }
 
-            label { font-size: 14px !important; }
-            .left-column { max-width: 250px; padding-right: 10px; }
+            label { font-size: 13px !important; }
+            .left-column { max-width: 240px; padding-right: 8px; }
         </style>
     """, unsafe_allow_html=True)
 
-    # ✅ Main Title & subtitle
+    # ✅ Compact Title
     st.markdown("""
-        <div style='text-align: center;'>
-            <h2 style='margin-bottom: 5px;'>Exploring the Mean Age of Suicide Mortality</h2>
-            <p style='font-size: 16px; font-style: italic;'>Data Source: IHME GBD 2021</p>
+        <div style='text-align: center; margin-bottom: 0.5rem;'>
+            <h2>Exploring the Mean Age of Suicide Mortality</h2>
+            <p style='font-size: 14px; font-style: italic; margin: 0;'>Data Source: IHME GBD 2021</p>
         </div>
     """, unsafe_allow_html=True)
 
@@ -78,7 +83,7 @@ if check_password():
 
     df = load_data()
 
-    # ✅ Column titles
+    # ✅ Aligned column titles
     title_col1, title_col2, title_col3 = st.columns([0.8, 1.6, 1.6])
     with title_col1:
         st.markdown('<p class="column-title">Controls & Insights</p>', unsafe_allow_html=True)
@@ -87,8 +92,8 @@ if check_password():
     with title_col3:
         st.markdown('<p class="column-title">Distribution & Boxplot</p>', unsafe_allow_html=True)
 
-    # ✅ Main layout: left filters, right plots
-    col_left, col_right = st.columns([0.7, 3.3])  # slightly narrower left panel
+    # ✅ Main layout: filters & insights | visuals
+    col_left, col_right = st.columns([0.7, 3.3])
 
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
@@ -123,7 +128,7 @@ if check_password():
         st.multiselect("Sex(es)", all_sexes, key="sexes_filter")
         st.multiselect("Year(s)", all_years, key="years_filter")
 
-        # ✅ Filtering
+        # ✅ Filtered data
         if st.session_state.global_view_checkbox:
             filtered_df = df[
                 df['sex_name'].isin(st.session_state.sexes_filter) &
@@ -136,7 +141,7 @@ if check_password():
                 df['year_id'].isin(st.session_state.years_filter)
             ]
 
-        st.markdown("<hr style='margin: 0.75rem 0'>", unsafe_allow_html=True)
+        st.markdown("<hr style='margin: 0.5rem 0;'>", unsafe_allow_html=True)
 
         if not filtered_df.empty:
             mean_age = filtered_df['val'].mean()
@@ -153,16 +158,15 @@ if check_password():
             for _, row in sex_stats.iterrows():
                 insights_html.append(f"{row['sex_name']}: <b>{row['val']:.2f} years</b>")
 
-            full_insights_html = f"<div class='small-metric'>{'<br>'.join(insights_html)}</div>"
-            st.markdown(full_insights_html, unsafe_allow_html=True)
+            st.markdown(f"<div class='small-metric'>{'<br>'.join(insights_html)}</div>", unsafe_allow_html=True)
         else:
             st.warning("Please select filters to see data.")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # ✅ Right: compact multi-plots
+    # ✅ Right: squeezed plots, 2 rows × 2 columns
     with col_right:
-        # ✅ Row 1: Bar & Map
+        # --- Row 1 ---
         row1_col1, row1_col2 = st.columns(2)
         with row1_col1:
             st.write("**Top 12 Ranked Mean Age by Location**")
@@ -173,17 +177,14 @@ if check_password():
                     .sort_values("val", ascending=False)
                     .head(12)
                 )
-                if not avg_loc.empty:
-                    fig_ranked = px.bar(
-                        avg_loc, x="val", y="location_name", orientation="h",
-                        color="val", color_continuous_scale="Viridis",
-                        labels={"val": "Mean Age", "location_name": "Location"},
-                    )
-                    fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
-                    fig_ranked.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
-                    st.plotly_chart(fig_ranked, use_container_width=True)
-                else:
-                    st.warning("No data for bar chart.")
+                fig_ranked = px.bar(
+                    avg_loc, x="val", y="location_name", orientation="h",
+                    color="val", color_continuous_scale="Viridis",
+                    labels={"val": "Mean Age", "location_name": "Location"},
+                )
+                fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
+                fig_ranked.update_layout(height=230, margin=dict(l=5, r=5, t=5, b=5))
+                st.plotly_chart(fig_ranked, use_container_width=True)
             else:
                 st.warning("No data for bar chart.")
 
@@ -200,12 +201,12 @@ if check_password():
                     color="Mean Age", color_continuous_scale="Viridis",
                     labels={"Mean Age": "Mean Age"},
                 )
-                fig_map.update_layout(height=250, margin=dict(l=0, r=0, t=5, b=5))
+                fig_map.update_layout(height=230, margin=dict(l=0, r=0, t=5, b=5))
                 st.plotly_chart(fig_map, use_container_width=True)
             else:
                 st.warning("No data for map.")
 
-        # ✅ Row 2: Histogram & Boxplot
+        # --- Row 2 ---
         row2_col1, row2_col2 = st.columns(2)
         with row2_col1:
             st.write("**Mean Age Distribution (Histogram)**")
@@ -215,7 +216,7 @@ if check_password():
                     nbins=20, color_discrete_sequence=["#636EFA"],
                     labels={"val": "Mean Age"}
                 )
-                fig_hist.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
+                fig_hist.update_layout(height=230, margin=dict(l=5, r=5, t=5, b=5))
                 st.plotly_chart(fig_hist, use_container_width=True)
             else:
                 st.warning("No data for histogram.")
@@ -229,7 +230,7 @@ if check_password():
                     labels={"sex_name": "Sex", "val": "Mean Age"},
                     color_discrete_sequence=px.colors.qualitative.Set1
                 )
-                fig_box.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
+                fig_box.update_layout(height=230, margin=dict(l=5, r=5, t=5, b=5))
                 st.plotly_chart(fig_box, use_container_width=True)
             else:
                 st.warning("No data for boxplot.")
