@@ -37,9 +37,11 @@ if check_password():
     df = load_data()
 
     # -------------------------------
-    # ✅ 3️⃣ 100% wide layout: [Filters] [big gap] [Insights] [big gap] [Chart]
+    # ✅ 3️⃣ Three side-by-side columns WITH BIG SPACERS
+    # Layout: [Filter] [BIG GAP] [Insights] [BIG GAP] [Chart]
+    # Chart column is the widest for clarity.
     # -------------------------------
-    col1, spacer1, col2, spacer2, col3 = st.columns([1, 0.5, 1, 0.5, 3])
+    col1, spacer1, col2, spacer2, col3 = st.columns([1, 1.2, 1, 1.2, 3])
 
     # -------------------------------
     # ✅ Column 1: Filters
@@ -74,7 +76,7 @@ if check_password():
         st.metric("Age Range", f"{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}")
 
     # -------------------------------
-    # ✅ Column 3: Chart (+ Table)
+    # ✅ Column 3: Chart (+ Data Table)
     # -------------------------------
     with col3:
         st.header("📈 Chart")
@@ -100,6 +102,6 @@ if check_password():
 
     st.markdown(
         "<hr style='margin-top: 30px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Clean Full-Screen Dashboard • IHME GBD 2021</div>",
+        "<div style='text-align: center;'>✅ Clean Full-Width Dashboard • IHME GBD 2021</div>",
         unsafe_allow_html=True
     )
