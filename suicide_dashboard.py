@@ -42,7 +42,8 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h1 style='text-align: center;'>Suicide Mean Age Dashboard — Single Row Filters</h1>", unsafe_allow_html=True)
+    # ⭐️ NEW, MORE SCIENTIFIC TITLE IS HERE ⭐️
+    st.markdown("<h1 style='text-align: center;'>Spatiotemporal Analysis of Mean Age at Death from Suicide (1990-2021)</h1>", unsafe_allow_html=True)
 
     @st.cache_data
     def load_data():
@@ -71,24 +72,23 @@ if check_password():
         
         show_global_top = st.checkbox("Show top 12 locations globally", help="Ignores the 'Location(s)' filter to find the top 12 across all data.")
 
-        # ⭐️ FIX: Set specific defaults to remove the 'X' button from all filters.
         selected_locations = st.multiselect(
             "Location(s)",
             all_locations,
-            default=["Global"], # A specific default removes the 'X'
+            default=["Global"],
             disabled=show_global_top
         )
         
         selected_sexes = st.multiselect(
             "Sex(es)",
             all_sexes,
-            default=["Both"] # A specific default removes the 'X'
+            default=["Both"]
         )
         
         selected_years = st.multiselect(
             "Year(s)",
             all_years,
-            default=[max(all_years)] # Default to the latest year removes the 'X'
+            default=[max(all_years)]
         )
         
         if show_global_top:
@@ -172,4 +172,4 @@ if check_password():
             else:
                 st.warning("No data for map.")
 
-    st.markdown("<hr><div style='text-align: center;'>Single Row Filters • IHME GBD 2021</div>", unsafe_allow_html=True)
+    st.markdown("<hr><div style='text-align: center;'>IHME GBD 2021</div>", unsafe_allow_html=True)
