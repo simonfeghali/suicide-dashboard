@@ -29,26 +29,27 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ CSS for fixed-height filter box with scroll
+    # ✅ CSS for compact filter boxes & tighter left column
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
             h1 { margin-top: 0; margin-bottom: 1rem; }
-            .small-metric { font-size: 18px !important; }
-            div[data-baseweb="select"] { max-height: 150px; overflow-y: auto; }
-            /* Fixed height + scroll for filter box */
-            .filter-box {
-                max-height: 300px;
-                overflow-y: auto;
-                padding: 10px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                background-color: #f9f9f9;
+            .small-metric { font-size: 16px !important; }
+            div[data-baseweb="select"] {
+                min-height: 30px !important;
+                font-size: 14px !important;
+            }
+            label {
+                font-size: 14px !important;
+            }
+            .left-column {
+                max-width: 250px;
+                padding-right: 10px;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Compact Filter Panel</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard — Compact & Tidy</h1>", unsafe_allow_html=True)
 
     @st.cache_data
     def load_data():
@@ -56,29 +57,25 @@ if check_password():
 
     df = load_data()
 
-    # Layout: Left = Filters + Insights | Right = Top 12 bar + Map
-    col_left, col_right = st.columns([1, 3])
+    # ✅ Make left column narrower: ~20%, right column ~80%
+    col_left, col_right = st.columns([0.8, 3.2])
 
     with col_left:
+        st.markdown('<div class="left-column">', unsafe_allow_html=True)
+
         st.subheader("🎛️ Filters")
 
-        # ✅ Wrap filters in a fixed-height box
-        with st.container():
-            st.markdown('<div class="filter-box">', unsafe_allow_html=True)
+        selected_locations = st.multiselect(
+            "Location(s)", sorted(df['location_name'].unique()), default=["Global"]
+        )
 
-            selected_locations = st.multiselect(
-                "Location(s)", sorted(df['location_name'].unique()), default=["Global"]
-            )
+        selected_sexes = st.multiselect(
+            "Sex(es)", sorted(df['sex_name'].unique()), default=sorted(df['sex_name'].unique())
+        )
 
-            selected_sexes = st.multiselect(
-                "Sex(es)", sorted(df['sex_name'].unique()), default=sorted(df['sex_name'].unique())
-            )
-
-            selected_years = st.multiselect(
-                "Year(s)", sorted(df['year_id'].unique()), default=sorted(df['year_id'].unique())
-            )
-
-            st.markdown('</div>', unsafe_allow_html=True)
+        selected_years = st.multiselect(
+            "Year(s)", sorted(df['year_id'].unique()), default=sorted(df['year_id'].unique())
+        )
 
         # Apply filters
         filtered_df = df[
@@ -102,6 +99,8 @@ if check_password():
                 st.markdown(f"<div class='small-metric'>{row['sex_name']}: <b>{row['val']:.2f} years</b></div>", unsafe_allow_html=True)
         else:
             st.warning("No data to show Mean Age by Sex.")
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with col_right:
         st.subheader("📊 Top 12 Ranked + Map")
@@ -159,6 +158,6 @@ if check_password():
 
     st.markdown(
         "<hr style='margin-top: 20px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Compact Filter Row with Scroll • IHME GBD 2021</div>",
+        "<div style='text-align: center;'>✅ Compact, Tighter Filter Panel • IHME GBD 2021</div>",
         unsafe_allow_html=True
     )
