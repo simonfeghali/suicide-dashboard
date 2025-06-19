@@ -36,20 +36,26 @@ if check_password():
             h1 { margin-top: 0; margin-bottom: 1rem; }
             .small-metric { font-size: 16px !important; }
 
-            /* FIX: Keep multiselect chips in one line + scroll horizontally */
-            div[data-baseweb="tag"] {
-                display: flex;
+            /* --- THE FIX IS HERE --- */
+
+            /* 1. Target the container that holds all the selected "chips" */
+            div[data-baseweb="select"] > div:first-child {
+                /* Prevent the chips from wrapping to the next line */
                 flex-wrap: nowrap !important;
-                overflow-x: auto;
-                overflow-y: hidden;
-                white-space: nowrap;
-                max-height: 40px;
+                /* Add a horizontal scrollbar if the chips overflow */
+                overflow-x: auto !important;
             }
 
+            /* 2. Force the multiselect widget itself to a fixed, single-line height */
             div[data-baseweb="select"] {
-                min-height: 40px !important;
+                /* Set a max-height to prevent vertical growth */
+                max-height: 50px; /* Adjust this value as needed */
+                /* Hide any potential vertical scrollbar */
+                overflow-y: hidden;
                 font-size: 14px !important;
             }
+            
+            /* --- END OF FIX --- */
 
             label {
                 font-size: 14px !important;
@@ -66,6 +72,7 @@ if check_password():
 
     @st.cache_data
     def load_data():
+        # Make sure you have this CSV file in the same directory or provide the correct path
         return pd.read_csv("IHME_GBD_2021_SUICIDE_1990_2021_DEATHS_MEAN_AGE_Y2025M02D12_0.csv")
 
     df = load_data()
@@ -98,20 +105,20 @@ if check_password():
         ]
 
         st.subheader("📌 Insights")
-        mean_age = filtered_df['val'].mean()
-        min_age = filtered_df['val'].min()
-        max_age = filtered_df['val'].max()
-
-        st.markdown(f"<div class='small-metric'>Overall Mean Age: <b>{mean_age:.2f} years</b></div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='small-metric'>Age Range: <b>{min_age:.2f} - {max_age:.2f}</b></div>", unsafe_allow_html=True)
-
         if not filtered_df.empty:
+            mean_age = filtered_df['val'].mean()
+            min_age = filtered_df['val'].min()
+            max_age = filtered_df['val'].max()
+
+            st.markdown(f"<div class='small-metric'>Overall Mean Age: <b>{mean_age:.2f} years</b></div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='small-metric'>Age Range: <b>{min_age:.2f} - {max_age:.2f}</b></div>", unsafe_allow_html=True)
+
             st.markdown("<b>Mean Age by Sex:</b>", unsafe_allow_html=True)
             sex_stats = filtered_df.groupby("sex_name")["val"].mean().reset_index()
             for _, row in sex_stats.iterrows():
                 st.markdown(f"<div class='small-metric'>{row['sex_name']}: <b>{row['val']:.2f} years</b></div>", unsafe_allow_html=True)
         else:
-            st.warning("No data to show Mean Age by Sex.")
+            st.warning("No data to show for selected filters.")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
