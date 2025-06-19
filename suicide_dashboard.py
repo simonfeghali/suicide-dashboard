@@ -28,7 +28,6 @@ def check_password():
 # -------------------------------
 if check_password():
     st.set_page_config(layout="wide")
-    # Tight styling
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
@@ -38,7 +37,7 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard (Pro Version)</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>📊 Suicide Mean Age Dashboard (Consultant Edition)</h1>", unsafe_allow_html=True)
 
     @st.cache_data
     def load_data():
@@ -47,7 +46,7 @@ if check_password():
     df = load_data()
 
     # -------------------------------
-    # ✅ Layout: Left = Filters + Insights | Right = 2 advanced plots
+    # ✅ Layout: Filters + Insights | RIGHT: 2 consultant-grade plots
     # -------------------------------
     col_left, col_right = st.columns([1, 3])
 
@@ -78,16 +77,16 @@ if check_password():
         st.markdown(f"<div class='small-metric'>Age Range: <b>{filtered_df['val'].min():.2f} - {filtered_df['val'].max():.2f}</b></div>", unsafe_allow_html=True)
 
     # -------------------------------
-    # ✅ Right: Advanced charts
+    # ✅ Right: 2 truly NEW, advanced charts
     # -------------------------------
     with col_right:
-        st.subheader("📊 Advanced Insights")
+        st.subheader("📊 Advanced Consultant Charts")
 
         chart_col1, chart_col2 = st.columns(2)
 
-        # ✅ Chart 1: Grouped bar by Sex & Year
+        # ✅ 1: GROUPED BAR: Mean Age by Sex & Year
         with chart_col1:
-            st.write("**Mean Age by Sex & Year**")
+            st.write("**Grouped Mean Age by Sex & Year**")
             if not filtered_df.empty:
                 grouped = filtered_df.groupby(["year_id", "sex_name"])["val"].mean().reset_index()
                 fig_grouped = px.bar(
@@ -99,14 +98,17 @@ if check_password():
                     labels={"year_id": "Year", "val": "Mean Age", "sex_name": "Sex"},
                     title=""
                 )
-                fig_grouped.update_layout(height=400, margin=dict(l=10, r=10, t=30, b=10))
+                fig_grouped.update_layout(
+                    height=400,
+                    margin=dict(l=10, r=10, t=30, b=10)
+                )
                 st.plotly_chart(fig_grouped, use_container_width=True)
             else:
-                st.warning("No data to show grouped chart.")
+                st.warning("No data for grouped bar chart.")
 
-        # ✅ Chart 2: Sorted horizontal bar by Location
+        # ✅ 2: SORTED HORIZONTAL BAR: Mean Age by Location (Ranking)
         with chart_col2:
-            st.write("**Mean Age by Location (Ranked)**")
+            st.write("**Ranked Mean Age by Location**")
             if not filtered_df.empty:
                 avg_loc = filtered_df.groupby("location_name")["val"].mean().reset_index()
                 avg_loc = avg_loc.sort_values("val", ascending=True)
@@ -116,17 +118,20 @@ if check_password():
                     y="location_name",
                     orientation="h",
                     color="val",
-                    color_continuous_scale="Viridis",
+                    color_continuous_scale="Blues",
                     labels={"val": "Mean Age", "location_name": "Location"},
                     title=""
                 )
-                fig_ranked.update_layout(height=400, margin=dict(l=10, r=10, t=30, b=10))
+                fig_ranked.update_layout(
+                    height=400,
+                    margin=dict(l=10, r=10, t=30, b=10)
+                )
                 st.plotly_chart(fig_ranked, use_container_width=True)
             else:
-                st.warning("No data to show ranking chart.")
+                st.warning("No data for ranking chart.")
 
     st.markdown(
         "<hr style='margin-top: 20px; margin-bottom: 10px;'>"
-        "<div style='text-align: center;'>✅ Pro Dashboard • IHME GBD 2021</div>",
+        "<div style='text-align: center;'>✅ Consultant-Grade Dashboard • IHME GBD 2021</div>",
         unsafe_allow_html=True
     )
