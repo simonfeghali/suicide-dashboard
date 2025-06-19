@@ -35,7 +35,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Custom CSS: bulletproof single-row chips with scroll
+    # ✅ Bulletproof single-row multiselect chips with scroll
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
@@ -43,7 +43,6 @@ if check_password():
             .small-metric { font-size: 15px !important; line-height: 1.2; }
             .column-title { font-size: 16px !important; font-weight: bold; text-align: center; margin-bottom: 0px; }
 
-            /* ✅ Real fix: target tag container exactly */
             div[data-baseweb="tag"] {
                 display: flex;
                 flex-wrap: nowrap !important;
@@ -53,7 +52,6 @@ if check_password():
                 max-height: 40px;
             }
 
-            /* Tighten select box */
             div[data-baseweb="select"] {
                 min-height: 40px !important;
                 font-size: 14px !important;
@@ -80,19 +78,18 @@ if check_password():
 
     df = load_data()
 
-    # ✅ Aligned column titles
+    # ✅ Column titles
     title_col1, title_col2, title_col3 = st.columns([0.8, 1.6, 1.6])
     with title_col1:
         st.markdown('<p class="column-title">Controls & Insights</p>', unsafe_allow_html=True)
     with title_col2:
-        st.markdown('<p class="column-title">Top 12 Ranked Mean Age by Location</p>', unsafe_allow_html=True)
+        st.markdown('<p class="column-title">Ranked & Map</p>', unsafe_allow_html=True)
     with title_col3:
-        st.markdown('<p class="column-title">Mean Age by Location (Map)</p>', unsafe_allow_html=True)
+        st.markdown('<p class="column-title">Distribution & Boxplot</p>', unsafe_allow_html=True)
 
-    # ✅ Main content columns
+    # ✅ Main layout: left filters, right plots
     col_left, col_right = st.columns([0.8, 3.2])
 
-    # ✅ Left Column: Filters & Insights
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
 
@@ -100,14 +97,12 @@ if check_password():
         all_sexes = sorted(df['sex_name'].unique())
         all_years = sorted(df['year_id'].unique())
 
-        # Session state default
         if "global_view_checkbox" not in st.session_state:
             st.session_state.global_view_checkbox = False
             st.session_state.locations_filter = []
             st.session_state.sexes_filter = all_sexes
             st.session_state.years_filter = all_years
 
-        # Reset button
         if st.button("Reset All Filters"):
             st.session_state.global_view_checkbox = False
             st.session_state.locations_filter = []
@@ -115,7 +110,6 @@ if check_password():
             st.session_state.years_filter = all_years
             st.rerun()
 
-        # Filter widgets bound to session state
         st.checkbox(
             "Show top 12 locations globally",
             key="global_view_checkbox",
@@ -129,7 +123,7 @@ if check_password():
         st.multiselect("Sex(es)", all_sexes, key="sexes_filter")
         st.multiselect("Year(s)", all_years, key="years_filter")
 
-        # ✅ Apply filter logic
+        # ✅ Filtering
         if st.session_state.global_view_checkbox:
             filtered_df = df[
                 df['sex_name'].isin(st.session_state.sexes_filter) &
@@ -144,7 +138,6 @@ if check_password():
 
         st.markdown("<hr style='margin: 0.75rem 0'>", unsafe_allow_html=True)
 
-        # ✅ Insights
         if not filtered_df.empty:
             mean_age = filtered_df['val'].mean()
             min_age = filtered_df['val'].min()
@@ -163,16 +156,16 @@ if check_password():
             full_insights_html = f"<div class='small-metric'>{'<br>'.join(insights_html)}</div>"
             st.markdown(full_insights_html, unsafe_allow_html=True)
         else:
-            st.warning("Please select at least one location to see data.")
+            st.warning("Please select filters to see data.")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # ✅ Right Column: Charts
+    # ✅ Right: new compact multi-plots
     with col_right:
-        chart_col1, chart_col2 = st.columns(2)
-
-        # Top 12 bar
-        with chart_col1:
+        # ✅ Row 1: Bar & Map
+        row1_col1, row1_col2 = st.columns(2)
+        with row1_col1:
+            st.write("**Top 12 Ranked Mean Age by Location**")
             if not filtered_df.empty:
                 avg_loc = (
                     filtered_df.groupby("location_name")["val"]
@@ -181,26 +174,21 @@ if check_password():
                     .head(12)
                 )
                 if not avg_loc.empty:
-                    height = max(400, len(avg_loc) * 25 + 100)
                     fig_ranked = px.bar(
                         avg_loc, x="val", y="location_name", orientation="h",
-                        color="val",
-                        color_continuous_scale="Viridis",
+                        color="val", color_continuous_scale="Viridis",
                         labels={"val": "Mean Age", "location_name": "Location"},
                     )
                     fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
-                    fig_ranked.update_layout(
-                        height=height, margin=dict(l=10, r=10, t=0, b=10),
-                        title_text=None
-                    )
+                    fig_ranked.update_layout(height=300, margin=dict(l=10, r=10, t=10, b=10))
                     st.plotly_chart(fig_ranked, use_container_width=True)
                 else:
-                    st.warning("No data for ranking chart.")
+                    st.warning("No data for bar chart.")
             else:
-                st.warning("No data for ranking chart.")
+                st.warning("No data for bar chart.")
 
-        # Map
-        with chart_col2:
+        with row1_col2:
+            st.write("**Mean Age by Location (Map)**")
             if not filtered_df.empty:
                 avg_map = (
                     filtered_df.groupby("location_name")["val"]
@@ -209,15 +197,39 @@ if check_password():
                 )
                 fig_map = px.choropleth(
                     avg_map, locations="Country", locationmode="country names",
-                    color="Mean Age",
-                    color_continuous_scale="Viridis",
+                    color="Mean Age", color_continuous_scale="Viridis",
                     labels={"Mean Age": "Mean Age"},
                 )
-                fig_map.update_layout(
-                    height=500,
-                    margin=dict(l=0, r=0, t=0, b=0),
-                    title_text=None
-                )
+                fig_map.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=10))
                 st.plotly_chart(fig_map, use_container_width=True)
             else:
                 st.warning("No data for map.")
+
+        # ✅ Row 2: Histogram & Boxplot
+        row2_col1, row2_col2 = st.columns(2)
+        with row2_col1:
+            st.write("**Mean Age Distribution (Histogram)**")
+            if not filtered_df.empty:
+                fig_hist = px.histogram(
+                    filtered_df, x="val",
+                    nbins=20, color_discrete_sequence=["#636EFA"],
+                    labels={"val": "Mean Age"}
+                )
+                fig_hist.update_layout(height=300, margin=dict(l=10, r=10, t=10, b=10))
+                st.plotly_chart(fig_hist, use_container_width=True)
+            else:
+                st.warning("No data for histogram.")
+
+        with row2_col2:
+            st.write("**Mean Age by Sex (Boxplot)**")
+            if not filtered_df.empty:
+                fig_box = px.box(
+                    filtered_df, x="sex_name", y="val",
+                    color="sex_name",
+                    labels={"sex_name": "Sex", "val": "Mean Age"},
+                    color_discrete_sequence=px.colors.qualitative.Set1
+                )
+                fig_box.update_layout(height=300, margin=dict(l=10, r=10, t=10, b=10))
+                st.plotly_chart(fig_box, use_container_width=True)
+            else:
+                st.warning("No data for boxplot.")
