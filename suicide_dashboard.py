@@ -36,7 +36,7 @@ if check_password():
     # --- PAGE CONFIG AND CSS ---
     st.set_page_config(layout="wide")
 
-    # This CSS block now includes the rule for the multiselect boxes
+    # This CSS block now includes the strict single-line rule
     st.markdown("""
         <style>
             .block-container {
@@ -46,14 +46,11 @@ if check_password():
                 padding-right: 5rem;
             }
 
-            /* --- NEW CSS FOR SINGLE-LINE MULTISELECT --- */
-            /* Target the container holding the selected items */
+            /* --- NEW CSS FOR STRICTLY SINGLE-LINE MULTISELECT --- */
             div[data-testid="stMultiSelect"] > div > div {
-                /* Set a max-height to prevent it from growing vertically */
-                max-height: 3.125rem; /* 50px */
-
-                /* Make it scroll horizontally instead of vertically */
-                overflow-y: hidden;
+                /* Prevent the selected items from wrapping to the next line */
+                flex-wrap: nowrap;
+                /* Add a horizontal scrollbar if the items overflow */
                 overflow-x: auto;
             }
             /* --- END OF NEW CSS --- */
