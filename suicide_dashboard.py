@@ -29,7 +29,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ⭐️ CHANGE 1: ADDED A '.column-title' CLASS FOR STYLING THE TITLES
+    # ⭐️ THE ONLY CHANGE IS HERE: 'text-align' IS NOW 'center' ⭐️
     st.markdown("""
         <style>
             .block-container { padding-top: 1rem; }
@@ -40,8 +40,8 @@ if check_password():
             .column-title {
                 font-size: 16px !important;
                 font-weight: bold;
-                text-align: left;
-                margin-bottom: 0px; /* Remove space below title to bring content closer */
+                text-align: center; /* This centers the title in its column */
+                margin-bottom: 0px;
             }
 
             /* Single-line multiselect styles */
@@ -60,9 +60,7 @@ if check_password():
 
     df = load_data()
 
-    # ⭐️ CHANGE 2: CREATE A DEDICATED HEADER ROW FOR TITLES
-    # The proportions [0.8, 1.6, 1.6] match the content columns below.
-    # (Left column is 0.8, Right column is 3.2, which splits into two 1.6 columns)
+    # --- Title Row ---
     title_col1, title_col2, title_col3 = st.columns([0.8, 1.6, 1.6])
     with title_col1:
         st.markdown('<p class="column-title">Controls & Insights</p>', unsafe_allow_html=True)
@@ -71,12 +69,11 @@ if check_password():
     with title_col3:
         st.markdown('<p class="column-title">Mean Age by Location (Map)</p>', unsafe_allow_html=True)
 
-    # --- This is now the "Content Row" ---
+    # --- Content Row ---
     col_left, col_right = st.columns([0.8, 3.2])
 
     with col_left:
         st.markdown('<div class="left-column">', unsafe_allow_html=True)
-        # ⭐️ CHANGE 3: The subheader title is removed from here
         
         all_locations = sorted(df['location_name'].unique())
         all_sexes = sorted(df['sex_name'].unique())
@@ -120,7 +117,6 @@ if check_password():
         chart_col1, chart_col2 = st.columns(2)
 
         with chart_col1:
-            # ⭐️ CHANGE 3: The chart title is removed from here
             if not filtered_df.empty:
                 avg_loc = (
                     filtered_df.groupby("location_name")["val"]
@@ -144,7 +140,6 @@ if check_password():
                 st.warning("No data for ranking chart.")
 
         with chart_col2:
-            # ⭐️ CHANGE 3: The chart title is removed from here
             if not filtered_df.empty:
                 avg_map = (
                     filtered_df.groupby("location_name")["val"]
