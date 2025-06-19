@@ -128,7 +128,7 @@ if check_password():
                     height = max(400, len(avg_loc) * 25 + 100)
                     fig_ranked = px.bar(
                         avg_loc, x="val", y="location_name", orientation="h",
-                        color="val", color_continuous_scale=px.colors.sequential.Plasma_r,
+                        color="val", color_continuous_scale=px.colors.sequential.Viridis,
                         labels={"val": "Mean Age", "location_name": "Location"},
                     )
                     fig_ranked.update_yaxes(automargin=True, categoryorder="total ascending")
