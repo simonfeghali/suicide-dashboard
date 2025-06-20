@@ -35,7 +35,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Improved CSS — also shrink input field size!
+    # ✅ Improved CSS — min + max height to truly lock box size
     st.markdown("""
         <style>
             .block-container {
@@ -48,22 +48,24 @@ if check_password():
                 margin-top: 0 !important;
             }
 
-            /* Smaller multiselect input field */
+            /* ✅ Exact size for multiselect box */
             div[data-baseweb="select"] {
                 min-height: 30px !important;
+                max-height: 30px !important;
                 font-size: 12px !important;
-                padding-top: 0px !important;
-                padding-bottom: 0px !important;
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
             }
 
-            /* Make input box itself smaller */
+            /* ✅ Exact size for the input field inside */
             div[data-baseweb="select"] input {
                 min-height: 24px !important;
+                max-height: 24px !important;
                 font-size: 12px !important;
                 padding: 2px 4px !important;
             }
 
-            /* Single-line tags with scroll */
+            /* ✅ Single-line tags with scroll, capped height */
             div[data-baseweb="tag"] {
                 display: flex;
                 flex-wrap: nowrap !important;
@@ -73,7 +75,7 @@ if check_password():
                 max-height: 26px !important;
             }
 
-            /* Smaller tag chips */
+            /* ✅ Smaller tag chips */
             span[data-baseweb="tag"] {
                 font-size: 11px !important;
                 height: 20px !important;
