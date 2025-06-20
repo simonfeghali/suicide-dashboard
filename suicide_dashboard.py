@@ -35,7 +35,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Updated CSS — removed title, no margin, lifted up
+    # ✅ Improved CSS — also shrink input field size!
     st.markdown("""
         <style>
             .block-container {
@@ -45,31 +45,40 @@ if check_password():
             .left-column {
                 max-width: 250px;
                 padding-right: 10px;
-                margin-top: 0 !important;  /* ensure no top margin */
+                margin-top: 0 !important;
             }
 
-            /* Shrink multiselect input */
+            /* Smaller multiselect input field */
             div[data-baseweb="select"] {
-                min-height: 36px !important;
+                min-height: 30px !important;
                 font-size: 12px !important;
+                padding-top: 0px !important;
+                padding-bottom: 0px !important;
             }
 
-            /* Force tags single line, scroll horizontally */
+            /* Make input box itself smaller */
+            div[data-baseweb="select"] input {
+                min-height: 24px !important;
+                font-size: 12px !important;
+                padding: 2px 4px !important;
+            }
+
+            /* Single-line tags with scroll */
             div[data-baseweb="tag"] {
                 display: flex;
                 flex-wrap: nowrap !important;
                 overflow-x: auto !important;
                 overflow-y: hidden !important;
                 white-space: nowrap;
-                max-height: 32px !important;
+                max-height: 26px !important;
             }
 
             /* Smaller tag chips */
             span[data-baseweb="tag"] {
                 font-size: 11px !important;
-                height: 22px !important;
+                height: 20px !important;
                 margin: 1px !important;
-                padding: 2px 4px !important;
+                padding: 1px 4px !important;
             }
 
             div[data-testid="stCheckbox"] {
@@ -91,7 +100,7 @@ if check_password():
     # ✅ MAIN 2 COLUMN LAYOUT:
     col_left, col_right = st.columns([0.7, 3.3])
 
-    # ✅ LEFT COLUMN — NO HEADER, LIFTED UP
+    # ✅ LEFT COLUMN — LIFTED UP, NO HEADER
     with col_left:
         st.markdown('<div class="left-column" style="margin-top: 0;">', unsafe_allow_html=True)
 
