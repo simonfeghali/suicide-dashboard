@@ -35,7 +35,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Updated CSS — removed title, no margin, lifted up
+    # ✅ Updated CSS — lifted up & compact boxes
     st.markdown("""
         <style>
             .block-container {
@@ -45,23 +45,21 @@ if check_password():
             .left-column {
                 max-width: 250px;
                 padding-right: 10px;
-                margin-top: 0 !important;  /* ensure no top margin */
+                margin-top: 0 !important;
             }
 
-            /* Shrink multiselect input */
+            /* Compact multiselect input */
             div[data-baseweb="select"] {
                 min-height: 36px !important;
                 font-size: 12px !important;
             }
 
-            /* Force tags single line, scroll horizontally */
-            div[data-baseweb="tag"] {
-                display: flex;
+            /* Force single-line tags with scroll */
+            div[data-baseweb="select"] > div:first-child {
                 flex-wrap: nowrap !important;
                 overflow-x: auto !important;
                 overflow-y: hidden !important;
                 white-space: nowrap;
-                max-height: 32px !important;
             }
 
             /* Smaller tag chips */
@@ -91,7 +89,7 @@ if check_password():
     # ✅ MAIN 2 COLUMN LAYOUT:
     col_left, col_right = st.columns([0.7, 3.3])
 
-    # ✅ LEFT COLUMN — NO HEADER, LIFTED UP
+    # ✅ LEFT COLUMN — Only filters
     with col_left:
         st.markdown('<div class="left-column" style="margin-top: 0;">', unsafe_allow_html=True)
 
@@ -143,30 +141,9 @@ if check_password():
                 df['year_id'].isin(st.session_state.years_filter)
             ]
 
-        st.markdown("<hr style='margin: 0.5rem 0;'>", unsafe_allow_html=True)
-
-        if not filtered_df.empty:
-            mean_age = filtered_df['val'].mean()
-            min_age = filtered_df['val'].min()
-            max_age = filtered_df['val'].max()
-
-            insights_html = [
-                f"Overall Mean Age: <b>{mean_age:.2f} years</b>",
-                f"Age Range: <b>{min_age:.2f} - {max_age:.2f}</b>",
-                "<b>Mean Age by Sex:</b>"
-            ]
-
-            sex_stats = filtered_df.groupby("sex_name")["val"].mean().reset_index()
-            for _, row in sex_stats.iterrows():
-                insights_html.append(f"{row['sex_name']}: <b>{row['val']:.2f} years</b>")
-
-            st.markdown(f"<div class='small-metric'>{'<br>'.join(insights_html)}</div>", unsafe_allow_html=True)
-        else:
-            st.warning("Please select filters to see data.")
-
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # ✅ RIGHT COLUMN — TITLE + PLOTS
+    # ✅ RIGHT COLUMN — TITLE + PLOTS only
     with col_right:
         st.markdown("""
             <div style='text-align: center; margin-bottom: 0.5rem;'>
