@@ -35,7 +35,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Updated CSS — lifted up & compact boxes
+    # ✅ Polished CSS for compact filters
     st.markdown("""
         <style>
             .block-container {
@@ -48,13 +48,13 @@ if check_password():
                 margin-top: 0 !important;
             }
 
-            /* Compact multiselect input */
+            /* Multiselect input box compact */
             div[data-baseweb="select"] {
                 min-height: 36px !important;
                 font-size: 12px !important;
             }
 
-            /* Force single-line tags with scroll */
+            /* Force single-line tags + scroll */
             div[data-baseweb="select"] > div:first-child {
                 flex-wrap: nowrap !important;
                 overflow-x: auto !important;
@@ -89,7 +89,7 @@ if check_password():
     # ✅ MAIN 2 COLUMN LAYOUT:
     col_left, col_right = st.columns([0.7, 3.3])
 
-    # ✅ LEFT COLUMN — Only filters
+    # ✅ LEFT COLUMN — Filters only
     with col_left:
         st.markdown('<div class="left-column" style="margin-top: 0;">', unsafe_allow_html=True)
 
@@ -143,7 +143,7 @@ if check_password():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # ✅ RIGHT COLUMN — TITLE + PLOTS only
+    # ✅ RIGHT COLUMN — TITLE + PLOTS
     with col_right:
         st.markdown("""
             <div style='text-align: center; margin-bottom: 0.5rem;'>
@@ -206,15 +206,19 @@ if check_password():
                 st.warning("No data for histogram.")
 
         with row2_col2:
-            st.write("**Mean Age by Sex (Boxplot)**")
+            st.write("**Mean Age by Sex (Bar Chart)**")
             if not filtered_df.empty:
-                fig_box = px.box(
-                    filtered_df, x="sex_name", y="val",
+                avg_sex = (
+                    filtered_df.groupby("sex_name")["val"]
+                    .mean().reset_index()
+                )
+                fig_bar_sex = px.bar(
+                    avg_sex, x="sex_name", y="val",
                     color="sex_name",
                     labels={"sex_name": "Sex", "val": "Mean Age"},
                     color_discrete_sequence=px.colors.qualitative.Set1
                 )
-                fig_box.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
-                st.plotly_chart(fig_box, use_container_width=True)
+                fig_bar_sex.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
+                st.plotly_chart(fig_bar_sex, use_container_width=True)
             else:
-                st.warning("No data for boxplot.")
+                st.warning("No data for bar chart.")
