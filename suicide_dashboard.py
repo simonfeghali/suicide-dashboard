@@ -35,7 +35,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Improved CSS — min + max height to truly lock box size
+    # ✅ FINAL CSS — locks box size, inner wrapper, tags & input field
     st.markdown("""
         <style>
             .block-container {
@@ -48,7 +48,7 @@ if check_password():
                 margin-top: 0 !important;
             }
 
-            /* ✅ Exact size for multiselect box */
+            /* ✅ Strict outer multiselect size */
             div[data-baseweb="select"] {
                 min-height: 30px !important;
                 max-height: 30px !important;
@@ -57,7 +57,16 @@ if check_password():
                 padding-bottom: 0 !important;
             }
 
-            /* ✅ Exact size for the input field inside */
+            /* ✅ Force internal tag/input wrapper to single row, scroll sideways */
+            div[data-baseweb="select"] > div:first-child {
+                display: flex;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                white-space: nowrap;
+            }
+
+            /* ✅ Input field itself: compact */
             div[data-baseweb="select"] input {
                 min-height: 24px !important;
                 max-height: 24px !important;
@@ -65,17 +74,7 @@ if check_password():
                 padding: 2px 4px !important;
             }
 
-            /* ✅ Single-line tags with scroll, capped height */
-            div[data-baseweb="tag"] {
-                display: flex;
-                flex-wrap: nowrap !important;
-                overflow-x: auto !important;
-                overflow-y: hidden !important;
-                white-space: nowrap;
-                max-height: 26px !important;
-            }
-
-            /* ✅ Smaller tag chips */
+            /* ✅ Smaller tags */
             span[data-baseweb="tag"] {
                 font-size: 11px !important;
                 height: 20px !important;
@@ -99,7 +98,7 @@ if check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    # ✅ MAIN 2 COLUMN LAYOUT:
+    # ✅ MAIN 2 COLUMN LAYOUT
     col_left, col_right = st.columns([0.7, 3.3])
 
     # ✅ LEFT COLUMN — LIFTED UP, NO HEADER
