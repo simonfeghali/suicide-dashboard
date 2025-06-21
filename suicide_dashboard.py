@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from sklearn.linear_model import LinearRegression
 import numpy as np
+import statsmodels.api as sm  # ✅ ARIMA
 
 # -------------------------------
 # ✅ 1️⃣ Password Gate
@@ -37,7 +37,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Compact filter styling
+    # ✅ CSS for compact filters
     st.markdown("""
         <style>
             .block-container {
@@ -197,49 +197,62 @@ if check_password():
             else:
                 st.warning("No data for histogram.")
 
-        # ✅ NEW: Forecast Plot instead of last plot
         with row2_col2:
-            st.write("**Forecasted Mean Age for Future Years**")
+            st.write("**Forecasted Mean Age for Future Years (ARIMA)**")
             if not filtered_df.empty:
-                # Prepare data
-                yearly_mean = (
-                    filtered_df.groupby("year_id")["val"]
-                    .mean().reset_index()
-                    .sort_values("year_id")
-                )
+                try:
+                    # Prepare yearly series
+                    yearly_mean = (
+                        filtered_df.groupby("year_id")["val"]
+                        .mean().reset_index()
+                        .sort_values("year_id")
+                    )
+                    y = yearly_mean["val"]
+                    y.index = pd.Index(yearly_mean["year_id"])
 
-                X = yearly_mean["year_id"].values.reshape(-1, 1)
-                y = yearly_mean["val"].values
+                    # Fit ARIMA(1,1,1)
+                    model = sm.tsa.ARIMA(y, order=(1, 1, 1)).fit()
 
-                # Fit simple linear regression
-                model = LinearRegression().fit(X, y)
+                    # Forecast next 10 years
+                    future = model.get_forecast(steps=10)
+                    future_index = np.arange(y.index.max() + 1, y.index.max() + 11)
+                    forecast_mean = future.predicted_mean
+                    conf_int = future.conf_int()
 
-                # Predict future years
-                future_years = np.arange(X.min(), X.max() + 10)
-                future_pred = model.predict(future_years.reshape(-1, 1))
+                    # Plot historical + forecast + CI
+                    fig = px.line(
+                        x=np.concatenate([y.index, future_index]),
+                        y=np.concatenate([y.values, forecast_mean]),
+                        labels={"x": "Year", "y": "Mean Age"}
+                    )
 
-                # Plot historical + forecast
-                forecast_df = pd.DataFrame({
-                    "Year": future_years,
-                    "Predicted Mean Age": future_pred
-                })
+                    fig.add_scatter(
+                        x=future_index,
+                        y=conf_int.iloc[:, 0],
+                        mode="lines",
+                        line=dict(color="lightgrey"),
+                        name="Lower CI"
+                    )
+                    fig.add_scatter(
+                        x=future_index,
+                        y=conf_int.iloc[:, 1],
+                        mode="lines",
+                        line=dict(color="lightgrey"),
+                        name="Upper CI",
+                        fill="tonexty"
+                    )
 
-                fig_forecast = px.line(
-                    forecast_df, x="Year", y="Predicted Mean Age",
-                    labels={"Predicted Mean Age": "Mean Age"},
-                    title=None
-                )
+                    fig.add_scatter(
+                        x=y.index,
+                        y=y.values,
+                        mode="markers",
+                        name="Historical Mean Age",
+                        marker=dict(color="red", size=6)
+                    )
 
-                # Add scatter of actual data
-                fig_forecast.add_scatter(
-                    x=yearly_mean["year_id"],
-                    y=yearly_mean["val"],
-                    mode="markers",
-                    name="Historical Mean Age",
-                    marker=dict(color="red", size=6)
-                )
-
-                fig_forecast.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
-                st.plotly_chart(fig_forecast, use_container_width=True)
+                    fig.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
+                    st.plotly_chart(fig, use_container_width=True)
+                except Exception as e:
+                    st.warning(f"ARIMA model could not fit: {e}")
             else:
                 st.warning("No data for forecast plot.")
