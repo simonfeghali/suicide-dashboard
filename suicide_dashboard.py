@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from sklearn.linear_model import LinearRegression
+import numpy as np
 
 # -------------------------------
 # ✅ 1️⃣ Password Gate
@@ -35,51 +37,41 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Polished CSS for compact filters
+    # ✅ Compact filter styling
     st.markdown("""
         <style>
             .block-container {
                 padding-top: 0rem !important;
             }
-
             .left-column {
                 max-width: 250px;
                 padding-right: 10px;
                 margin-top: 0 !important;
             }
-
-            /* Multiselect input box compact */
             div[data-baseweb="select"] {
                 min-height: 36px !important;
                 font-size: 12px !important;
             }
-
-            /* Force single-line tags + scroll */
             div[data-baseweb="select"] > div:first-child {
                 flex-wrap: nowrap !important;
                 overflow-x: auto !important;
                 overflow-y: hidden !important;
                 white-space: nowrap;
             }
-
-            /* Smaller tag chips */
             span[data-baseweb="tag"] {
                 font-size: 11px !important;
                 height: 22px !important;
                 margin: 1px !important;
                 padding: 2px 4px !important;
             }
-
             div[data-testid="stCheckbox"] {
                 margin: 0 0 0.2rem 0;
             }
-
             div.stButton > button {
                 font-size: 12px !important;
                 padding: 0.25rem 0.7rem;
                 margin-bottom: 0.3rem;
             }
-
             label {
                 font-size: 12px !important;
             }
@@ -205,20 +197,49 @@ if check_password():
             else:
                 st.warning("No data for histogram.")
 
+        # ✅ NEW: Forecast Plot instead of last plot
         with row2_col2:
-            st.write("**Mean Age by Sex (Bar Chart)**")
+            st.write("**Forecasted Mean Age for Future Years**")
             if not filtered_df.empty:
-                avg_sex = (
-                    filtered_df.groupby("sex_name")["val"]
+                # Prepare data
+                yearly_mean = (
+                    filtered_df.groupby("year_id")["val"]
                     .mean().reset_index()
+                    .sort_values("year_id")
                 )
-                fig_bar_sex = px.bar(
-                    avg_sex, x="sex_name", y="val",
-                    color="sex_name",
-                    labels={"sex_name": "Sex", "val": "Mean Age"},
-                    color_discrete_sequence=px.colors.qualitative.Set1
+
+                X = yearly_mean["year_id"].values.reshape(-1, 1)
+                y = yearly_mean["val"].values
+
+                # Fit simple linear regression
+                model = LinearRegression().fit(X, y)
+
+                # Predict future years
+                future_years = np.arange(X.min(), X.max() + 10)
+                future_pred = model.predict(future_years.reshape(-1, 1))
+
+                # Plot historical + forecast
+                forecast_df = pd.DataFrame({
+                    "Year": future_years,
+                    "Predicted Mean Age": future_pred
+                })
+
+                fig_forecast = px.line(
+                    forecast_df, x="Year", y="Predicted Mean Age",
+                    labels={"Predicted Mean Age": "Mean Age"},
+                    title=None
                 )
-                fig_bar_sex.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
-                st.plotly_chart(fig_bar_sex, use_container_width=True)
+
+                # Add scatter of actual data
+                fig_forecast.add_scatter(
+                    x=yearly_mean["year_id"],
+                    y=yearly_mean["val"],
+                    mode="markers",
+                    name="Historical Mean Age",
+                    marker=dict(color="red", size=6)
+                )
+
+                fig_forecast.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
+                st.plotly_chart(fig_forecast, use_container_width=True)
             else:
-                st.warning("No data for bar chart.")
+                st.warning("No data for forecast plot.")
