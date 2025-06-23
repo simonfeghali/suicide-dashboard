@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import numpy as np
-import statsmodels.api as sm  # ARIMA
+import statsmodels.api as sm  # ✅ ARIMA
 
 # -------------------------------
 # ✅ 1️⃣ Password Gate
@@ -37,7 +37,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ Polished CSS for compact filters
+    # ✅ CSS for compact filters
     st.markdown("""
         <style>
             .block-container {
@@ -145,13 +145,15 @@ if check_password():
         """, unsafe_allow_html=True)
 
         row1_col1, row1_col2 = st.columns(2)
+
+        # ✅ BOTTOM 12 RANKED
         with row1_col1:
             st.write("**Bottom 12 Ranked Mean Age by Location**")
             if not filtered_df.empty:
                 avg_loc = (
                     filtered_df.groupby("location_name")["val"]
                     .mean().reset_index()
-                    .sort_values("val", ascending=True)   # ✅ LEAST 12
+                    .sort_values("val", ascending=True)
                     .head(12)
                 )
                 fig_ranked = px.bar(
@@ -184,19 +186,25 @@ if check_password():
                 st.warning("No data for map.")
 
         row2_col1, row2_col2 = st.columns(2)
+
+        # ✅ UPDATED HISTOGRAM BY SEX
         with row2_col1:
-            st.write("**Mean Age Distribution (Histogram)**")
+            st.write("**Mean Age Distribution by Sex (Histogram)**")
             if not filtered_df.empty:
                 fig_hist = px.histogram(
                     filtered_df, x="val",
-                    nbins=20, color_discrete_sequence=["#636EFA"],
-                    labels={"val": "Mean Age"}
+                    color="sex_name",
+                    nbins=20,
+                    labels={"val": "Mean Age", "sex_name": "Sex"},
+                    barmode="overlay",
+                    color_discrete_sequence=px.colors.qualitative.Set1
                 )
                 fig_hist.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
                 st.plotly_chart(fig_hist, use_container_width=True)
             else:
                 st.warning("No data for histogram.")
 
+        # ✅ FORECAST PLOT
         with row2_col2:
             st.write("**Forecasted Mean Age for Future Years (ARIMA)**")
             if not filtered_df.empty:
