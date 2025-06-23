@@ -187,22 +187,24 @@ if check_password():
 
         row2_col1, row2_col2 = st.columns(2)
 
-        # ✅ UPDATED HISTOGRAM BY SEX
+        # ✅ NEW: BAR PLOT OF MEAN AGE BY SEX
         with row2_col1:
-            st.write("**Mean Age Distribution by Sex (Histogram)**")
+            st.write("**Mean Age by Sex (Bar Chart)**")
             if not filtered_df.empty:
-                fig_hist = px.histogram(
-                    filtered_df, x="val",
+                avg_sex = (
+                    filtered_df.groupby("sex_name")["val"]
+                    .mean().reset_index()
+                )
+                fig_bar_sex = px.bar(
+                    avg_sex, x="sex_name", y="val",
                     color="sex_name",
-                    nbins=20,
-                    labels={"val": "Mean Age", "sex_name": "Sex"},
-                    barmode="overlay",
+                    labels={"sex_name": "Sex", "val": "Mean Age"},
                     color_discrete_sequence=px.colors.qualitative.Set1
                 )
-                fig_hist.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
-                st.plotly_chart(fig_hist, use_container_width=True)
+                fig_bar_sex.update_layout(height=250, margin=dict(l=5, r=5, t=5, b=5))
+                st.plotly_chart(fig_bar_sex, use_container_width=True)
             else:
-                st.warning("No data for histogram.")
+                st.warning("No data for mean age by sex.")
 
         # ✅ FORECAST PLOT
         with row2_col2:
