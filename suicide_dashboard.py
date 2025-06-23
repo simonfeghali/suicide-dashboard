@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import numpy as np
-import statsmodels.api as sm  # ✅ ARIMA
+import statsmodels.api as sm  # ARIMA
 
 # -------------------------------
 # ✅ 1️⃣ Password Gate
@@ -37,7 +37,7 @@ def check_password():
 if check_password():
     st.set_page_config(layout="wide")
 
-    # ✅ CSS for compact filters
+    # ✅ Polished CSS for compact filters
     st.markdown("""
         <style>
             .block-container {
@@ -146,12 +146,12 @@ if check_password():
 
         row1_col1, row1_col2 = st.columns(2)
         with row1_col1:
-            st.write("**Top 12 Ranked Mean Age by Location**")
+            st.write("**Bottom 12 Ranked Mean Age by Location**")
             if not filtered_df.empty:
                 avg_loc = (
                     filtered_df.groupby("location_name")["val"]
                     .mean().reset_index()
-                    .sort_values("val", ascending=False)
+                    .sort_values("val", ascending=True)   # ✅ Show lowest 12
                     .head(12)
                 )
                 fig_ranked = px.bar(
@@ -201,7 +201,6 @@ if check_password():
             st.write("**Forecasted Mean Age for Future Years (ARIMA)**")
             if not filtered_df.empty:
                 try:
-                    # Prepare yearly series
                     yearly_mean = (
                         filtered_df.groupby("year_id")["val"]
                         .mean().reset_index()
@@ -210,16 +209,12 @@ if check_password():
                     y = yearly_mean["val"]
                     y.index = pd.Index(yearly_mean["year_id"])
 
-                    # Fit ARIMA(1,1,1)
                     model = sm.tsa.ARIMA(y, order=(1, 1, 1)).fit()
-
-                    # Forecast next 10 years
                     future = model.get_forecast(steps=10)
                     future_index = np.arange(y.index.max() + 1, y.index.max() + 11)
                     forecast_mean = future.predicted_mean
                     conf_int = future.conf_int()
 
-                    # Plot historical + forecast + CI
                     fig = px.line(
                         x=np.concatenate([y.index, future_index]),
                         y=np.concatenate([y.values, forecast_mean]),
