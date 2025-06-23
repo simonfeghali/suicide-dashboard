@@ -109,9 +109,9 @@ if check_password():
             st.rerun()
 
         st.checkbox(
-            "Show top 12 locations globally",
+            "Show bottom 12 locations globally",
             key="global_view_checkbox",
-            help="Ignores the 'Location(s)' filter to find the top 12 globally."
+            help="Ignores the 'Location(s)' filter to find the bottom 12 globally."
         )
         st.multiselect(
             "Location(s)", all_locations,
@@ -151,7 +151,7 @@ if check_password():
                 avg_loc = (
                     filtered_df.groupby("location_name")["val"]
                     .mean().reset_index()
-                    .sort_values("val", ascending=True)   # ✅ Show lowest 12
+                    .sort_values("val", ascending=True)   # ✅ LEAST 12
                     .head(12)
                 )
                 fig_ranked = px.bar(
